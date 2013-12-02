@@ -16,13 +16,13 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 
 public class CommonProxy implements IGuiHandler {
 
-	public static HandlerBlocks handlerBlocks;
-	public static HandlerConfig handlerConfig;
-	public static HandlerGui handlerGui;
-	public static HandlerItems handlerItems;
-	public static HandlerLanguage handlerLanguage;
-	public static HandlerTicks handlerTicks;
-	public static HandlerTileEntities handlerTileEntities;
+	public static HandlerBlocks handlerBlocks = new HandlerBlocks();
+	public static HandlerConfig handlerConfig = new HandlerConfig();
+	public static HandlerGui handlerGui = new HandlerGui();
+	public static HandlerItems handlerItems = new HandlerItems();
+	public static HandlerLanguage handlerLanguage = new HandlerLanguage();
+	public static HandlerTicks handlerTicks = new HandlerTicks();
+	public static HandlerTileEntities handlerTileEntities = new HandlerTileEntities();
 	
 	public static AchievementPage achievementPage = new AchievementPage(EconomyMod.modName);
 	
