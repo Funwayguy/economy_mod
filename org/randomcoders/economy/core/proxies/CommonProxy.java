@@ -2,9 +2,6 @@ package org.randomcoders.economy.core.proxies;
 
 import org.randomcoders.economy.core.EconomyMod;
 import org.randomcoders.economy.handlers.*;
-
-import com.nightfallstudios.alchemytrader.AlchemyTrader;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.AchievementPage;
