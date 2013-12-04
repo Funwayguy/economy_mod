@@ -11,7 +11,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 
-public class CommonProxy implements IGuiHandler {
+public class CommonProxy/* implements IGuiHandler*/ {
 
 	public static HandlerBlocks handlerBlocks = new HandlerBlocks();
 	public static HandlerConfig handlerConfig = new HandlerConfig();
@@ -44,13 +44,13 @@ public class CommonProxy implements IGuiHandler {
 		handlerTicks.init(event);
 		handlerGui.init(event);
 		
-		NetworkRegistry.instance().registerGuiHandler(EconomyMod.instance, this);	
+		//NetworkRegistry.instance().registerGuiHandler(EconomyMod.instance, this);	
 	}
 	
 	public void postInit(FMLPostInitializationEvent event) {
 	}
 
-	@Override
+	/*@Override
 	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		return null;
 	}
@@ -58,6 +58,6 @@ public class CommonProxy implements IGuiHandler {
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		return null;
-	}
+	}*/
 	
 }

@@ -10,7 +10,7 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 
 public class HandlerBlocks extends Handler
 {
-	BlockTrader blockTrader = new BlockTrader(500, Material.iron);
+	public static BlockTrader blockTrader = new BlockTrader(500, Material.iron);
 	
 	@Override
 	public void preInit(FMLPreInitializationEvent event)
