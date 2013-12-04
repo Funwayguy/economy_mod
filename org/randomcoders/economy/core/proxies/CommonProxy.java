@@ -8,10 +8,9 @@ import net.minecraftforge.common.AchievementPage;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 
-public class CommonProxy implements IGuiHandler {
+public class CommonProxy {
 
 	public static HandlerBlocks handlerBlocks = new HandlerBlocks();
 	public static HandlerConfig handlerConfig = new HandlerConfig();
@@ -45,23 +44,11 @@ public class CommonProxy implements IGuiHandler {
 		handlerLanguage.init(event);
 		handlerTicks.init(event);
 		handlerGui.init(event);
-		handlerEconomy.init(event);
-		
-		NetworkRegistry.instance().registerGuiHandler(EconomyMod.instance, this);	
+		handlerEconomy.init(event);	
 	}
 	
 	public void postInit(FMLPostInitializationEvent event) {
 		//add recalculate here. Add postInit to handlers.
-	}
-
-	@Override
-	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		return null;
-	}
-
-	@Override
-	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		return null;
 	}
 	
 }
