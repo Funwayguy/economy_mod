@@ -15,6 +15,7 @@ public class CommonProxy implements IGuiHandler {
 
 	public static HandlerBlocks handlerBlocks = new HandlerBlocks();
 	public static HandlerConfig handlerConfig = new HandlerConfig();
+	public static HandlerEconomy handlerEconomy = new HandlerEconomy();
 	public static HandlerGui handlerGui = new HandlerGui();
 	public static HandlerItems handlerItems = new HandlerItems();
 	public static HandlerLanguage handlerLanguage = new HandlerLanguage();
@@ -33,6 +34,7 @@ public class CommonProxy implements IGuiHandler {
 		handlerLanguage.preInit(event);
 		handlerTicks.preInit(event);
 		handlerGui.preInit(event);
+		handlerEconomy.preInit(event);
 	}
 	
 	public void init(FMLInitializationEvent event) {	
@@ -43,11 +45,13 @@ public class CommonProxy implements IGuiHandler {
 		handlerLanguage.init(event);
 		handlerTicks.init(event);
 		handlerGui.init(event);
+		handlerEconomy.init(event);
 		
 		NetworkRegistry.instance().registerGuiHandler(EconomyMod.instance, this);	
 	}
 	
 	public void postInit(FMLPostInitializationEvent event) {
+		//add recalculate here. Add postInit to handlers.
 	}
 
 	@Override
