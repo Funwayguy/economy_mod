@@ -1,10 +1,13 @@
 package org.randomcoders.economy.inventory;
 
 import org.lwjgl.opengl.GL11;
-
+import org.randomcoders.economy.handlers.trading.HandlerTradeDB;
+import org.randomcoders.economy.handlers.trading.TradeInstance;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
@@ -39,6 +42,16 @@ public class GuiTrader extends GuiContainer
 	public GuiButton pickupButton;
 	
 	public int curPage;
+	
+	public ItemStack sellItem;
+	public String sellOffer;
+	
+	public ItemStack buyItem;
+	public String buySearch;
+	public String buyAmount;
+	public String buyOffer;
+	
+	public String marketSearch;
 	
 	public GuiTrader(InventoryPlayer playerInvo)
 	{
@@ -88,6 +101,7 @@ public class GuiTrader extends GuiContainer
 					ySize = buySizeY;
 					curPage = 0;
 					reloadButtons();
+					reloadContainer();
 				}
 				break;
 			}
@@ -99,6 +113,7 @@ public class GuiTrader extends GuiContainer
 					ySize = sellSizeY;
 					curPage = 1;
 					reloadButtons();
+					reloadContainer();
 				}
 				break;
 			}
@@ -110,6 +125,7 @@ public class GuiTrader extends GuiContainer
 					ySize = tradesSizeY;
 					curPage = 2;
 					reloadButtons();
+					reloadContainer();
 				}
 				break;
 			}
@@ -121,12 +137,17 @@ public class GuiTrader extends GuiContainer
 					ySize = marketSizeY;
 					curPage = 3;
 					reloadButtons();
+					reloadContainer();
 				}
 				break;
 			}
 		}
 	}
 	
+	public void reloadContainer()
+	{
+	}
+
 	@SuppressWarnings("unchecked")
 	public void reloadButtons()
 	{
@@ -250,6 +271,77 @@ public class GuiTrader extends GuiContainer
 		int x = (width - xSize) / 2;
 		int y = (height - ySize) / 2;
 		this.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
+		
+		if(curPage == 2)
+		{
+			for(int i = 0; i < HandlerTradeDB.buyList.size(); i++)
+			{
+				//this.drawTexturedModelRectFromIcon(x, y, HandlerTradeDB.buyList.get(i).tradeItem.getIconIndex(), 16, 16);
+				//28, 68
+				
+				TradeInstance trade = HandlerTradeDB.buyList.get(i);
+				
+				//itemRender.renderItemIntoGUI(fontRenderer, this.mc.getTextureManager(), item, x + 28, y + 68 + (i * 20));
+				this.drawItemStack(trade.tradeItem, x + 28, y + 68 + (i * 20), trade.tradeItem.stackSize > 1? "" + trade.tradeItem.stackSize : "");
+				
+				fontRenderer.drawString("$" + trade.getDisplayValue(), x + 52, y + 68 + (i * 20) + 4, 4210752);
+			}
+			
+			for(int i = 0; i < HandlerTradeDB.sellList.size(); i++)
+			{
+				//this.drawTexturedModelRectFromIcon(x, y, HandlerTradeDB.buyList.get(i).tradeItem.getIconIndex(), 16, 16);
+				//28, 68
+				
+				TradeInstance trade = HandlerTradeDB.sellList.get(i);
+				
+				//itemRender.renderItemIntoGUI(fontRenderer, this.mc.getTextureManager(), item, x + 92, y + 68 + (i * 20));
+				this.drawItemStack(trade.tradeItem, x + 92, y + 68 + (i * 20), trade.tradeItem.stackSize > 1? "" + trade.tradeItem.stackSize : "");
+				
+				fontRenderer.drawString("$" + trade.getDisplayValue(), x + 116, y + 68 + (i * 20) + 4, 4210752);
+			}
+			
+			for(int i = 0; i < HandlerTradeDB.buyList.size(); i++)
+			{
+				TradeInstance trade = HandlerTradeDB.buyList.get(i);
+				
+				if(this.isPointInRegion(x + 28, y + 68 + (i * 20), 16, 16, par2, par3))
+				{
+					this.drawItemStackTooltip(trade.tradeItem, par2, par3);
+				}
+			}
+			
+			for(int i = 0; i < HandlerTradeDB.sellList.size(); i++)
+			{
+				TradeInstance trade = HandlerTradeDB.sellList.get(i);
+				
+				if(this.isPointInRegion(x + 92, y + 68 + (i * 20), 16, 16, par2, par3))
+				{
+					this.drawItemStackTooltip(trade.tradeItem, par2, par3);
+				}
+			}
+		}
 	}
+
+    /**
+     * Called when the mouse is clicked.
+     */
+    protected void mouseClicked(int par1, int par2, int par3)
+    {
+        super.mouseClicked(par1, par2, par3);
+    }
+
+    private void drawItemStack(ItemStack par1ItemStack, int par2, int par3, String par4Str)
+    {
+        GL11.glTranslatef(0.0F, 0.0F, 32.0F);
+        this.zLevel = 200.0F;
+        itemRenderer.zLevel = 200.0F;
+        FontRenderer font = null;
+        if (par1ItemStack != null) font = par1ItemStack.getItem().getFontRenderer(par1ItemStack);
+        if (font == null) font = fontRenderer;
+        itemRenderer.renderItemAndEffectIntoGUI(font, this.mc.getTextureManager(), par1ItemStack, par2, par3);
+        itemRenderer.renderItemOverlayIntoGUI(font, this.mc.getTextureManager(), par1ItemStack, par2, par3, par4Str);
+        this.zLevel = 0.0F;
+        itemRenderer.zLevel = 0.0F;
+    }
 	
 }

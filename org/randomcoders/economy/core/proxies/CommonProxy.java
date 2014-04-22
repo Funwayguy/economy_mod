@@ -2,14 +2,10 @@ package org.randomcoders.economy.core.proxies;
 
 import org.randomcoders.economy.core.EconomyMod;
 import org.randomcoders.economy.handlers.*;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
 import net.minecraftforge.common.AchievementPage;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.network.NetworkRegistry;
 
 public class CommonProxy/* implements IGuiHandler*/ {
 
@@ -22,6 +18,11 @@ public class CommonProxy/* implements IGuiHandler*/ {
 	public static HandlerTileEntities handlerTileEntities = new HandlerTileEntities();
 	
 	public static AchievementPage achievementPage = new AchievementPage(EconomyMod.modName);
+	
+	public boolean isClient()
+	{
+		return false;
+	}
 	
 	public void preInit(FMLPreInitializationEvent event) {
 		//init modmetadata here
