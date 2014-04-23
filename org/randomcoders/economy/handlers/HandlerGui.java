@@ -3,7 +3,6 @@ package org.randomcoders.economy.handlers;
 import org.randomcoders.economy.core.EconomyMod;
 import org.randomcoders.economy.inventory.ContainerTrader;
 import org.randomcoders.economy.inventory.GuiTrader;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -42,7 +41,13 @@ public class HandlerGui extends Handler implements IGuiHandler
 		int blockID = world.getBlockId(x, y, z);
 		if(blockID == HandlerBlocks.blockTrader.blockID)
 		{
-			return new GuiTrader(player.inventory);
+			if(EconomyMod.proxy.isClient())
+			{
+				return new GuiTrader(player.inventory);
+			} else
+			{
+				return new ContainerTrader(player.inventory);
+			}
 		}
 		return null;
 	}

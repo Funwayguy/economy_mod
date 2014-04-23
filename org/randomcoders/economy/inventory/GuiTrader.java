@@ -1,13 +1,22 @@
 package org.randomcoders.economy.inventory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
 import org.lwjgl.opengl.GL11;
+import org.randomcoders.economy.core.EconomyMod;
+import org.randomcoders.economy.handlers.packets.PacketHandler;
 import org.randomcoders.economy.handlers.trading.HandlerTradeDB;
 import org.randomcoders.economy.handlers.trading.TradeInstance;
+import cpw.mods.fml.common.network.PacketDispatcher;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
@@ -52,10 +61,16 @@ public class GuiTrader extends GuiContainer
 	public String buyOffer;
 	
 	public String marketSearch;
+	public ContainerTrader containerTrader;
+	
+	public EntityPlayer playerUser;
 	
 	public GuiTrader(InventoryPlayer playerInvo)
 	{
 		super(new ContainerTrader(playerInvo));
+		playerUser = playerInvo.player;
+		containerTrader = (ContainerTrader)this.inventorySlots;
+		containerTrader.trader = this;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -66,27 +81,8 @@ public class GuiTrader extends GuiContainer
 		xSize = buySizeX;
 		ySize = buySizeY;
 		
-		int posX = (this.width - xSize) / 2;
-		int posY = (this.height - ySize) / 2;
-		
-		buyButton = new GuiButton(0, posX + 24, posY + 24, 40, 20, "Buy");
-		sellButton = new GuiButton(1, posX + 72, posY + 24, 40, 20, "Sell");
-		tradesButton = new GuiButton(2, posX + 120, posY + 24, 48, 20, "Trades");
-		marketButton = new GuiButton(3, posX + 176, posY + 24, 48, 20, "Market");
-		
-		deliverButton = new GuiButton(0, posX + 112, posY + 88, 48, 20, "Deliver");
-		pickupButton = new GuiButton(0, posX + 176, posY + 88, 48, 20, "Pickup");
-		
-		confirmButton = new GuiButton(4, posX + 24, posY + 152, 200, 20, "Confirm");
-		
-		this.buttonList.add(buyButton);
-		this.buttonList.add(sellButton);
-		this.buttonList.add(tradesButton);
-		this.buttonList.add(marketButton);
-
-		this.buttonList.add(deliverButton);
-		this.buttonList.add(pickupButton);
-		this.buttonList.add(confirmButton);
+		reloadButtons();
+		reloadContainer();
 	}
 	
 	public void actionPerformed(GuiButton button)
@@ -142,10 +138,37 @@ public class GuiTrader extends GuiContainer
 				break;
 			}
 		}
+		
+		if(EconomyMod.proxy.isClient())
+		{
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			DataOutputStream outputStream = new DataOutputStream(bos);
+			try
+			{
+				outputStream.writeInt(PacketHandler.GUI_ID);
+				outputStream.writeInt(this.curPage);
+				outputStream.writeInt(this.getPosX());
+				outputStream.writeInt(this.getPosY());
+				outputStream.writeInt(this.playerUser.entityId);
+				outputStream.writeInt(this.playerUser.dimension);
+			} catch(IOException e)
+			{
+				e.printStackTrace();
+				return;
+			}
+			
+			Packet250CustomPayload packet = new Packet250CustomPayload();
+			packet.channel = PacketHandler.channel;
+			packet.data = bos.toByteArray();
+			packet.length = bos.size();
+			PacketDispatcher.sendPacketToServer(packet);
+			EconomyMod.logger.log(Level.INFO, "Sent page change packet to server...");
+		}
 	}
 	
 	public void reloadContainer()
 	{
+		containerTrader.updatePage(curPage, this.getPosX(), this.getPosY());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -220,7 +243,7 @@ public class GuiTrader extends GuiContainer
 			case 1:
 			{
 				fontRenderer.drawString("Price Per Item", posX + 24, posY + 84, 4210752);
-				fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), posX + 8, posY + 120, 4210752);
+				fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), posX + 43, posY + 120, 4210752);
 				break;
 			}
 			case 2:
@@ -342,6 +365,21 @@ public class GuiTrader extends GuiContainer
         itemRenderer.renderItemOverlayIntoGUI(font, this.mc.getTextureManager(), par1ItemStack, par2, par3, par4Str);
         this.zLevel = 0.0F;
         itemRenderer.zLevel = 0.0F;
+    }
+
+	public int getPosX()
+	{
+		return (this.width - xSize) / 2;
+	}
+
+	public int getPosY()
+	{
+		return (this.height - ySize) / 2;
+	}
+	
+	public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2)
+    {
+        return null;
     }
 	
 }
