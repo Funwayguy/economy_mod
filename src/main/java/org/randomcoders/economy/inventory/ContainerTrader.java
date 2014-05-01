@@ -1,8 +1,6 @@
 package org.randomcoders.economy.inventory;
 
-import java.util.logging.Level;
-import org.randomcoders.economy.core.EconomyMod;
-import net.minecraft.block.Block;
+import org.randomcoders.economy.blocks.TileEntityTrader;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -11,55 +9,133 @@ import net.minecraft.item.ItemStack;
 
 public class ContainerTrader extends Container
 {
-	public GuiTrader trader;
+	public TileEntityTrader traderInventory;
 	public InventoryPlayer playerInv;
 	public int pageNum;
-	public int x;
-	public int y;
 	
-	public ContainerTrader(InventoryPlayer playerInvo)
+	public ContainerTrader(InventoryPlayer playerInvo, TileEntityTrader trader)
 	{
-		this.playerInv = playerInvo;
+		this.traderInventory = trader;
+		trader.openChest();
+		
+		this.addSlotToContainer(new Slot(trader, 0, 8, 18));
+		
+		int j;
+		int k;
+		
+		for(j = 0; j < 3; ++j)
+		{
+			for(k = 0; k < 9; ++k)
+			{
+				this.addSlotToContainer(new Slot(playerInvo, k + j * 9 + 9, 8 + k * 18, 103 + j * 18));
+			}
+		}
+		
+		for(j = 0; j < 9; ++j)
+		{
+			this.addSlotToContainer(new Slot(playerInvo, j, 8 + j * 18, 161));
+		}
+	}
+	
+	public boolean canInteractWith(EntityPlayer par1EntityPlayer)
+	{
+		return this.traderInventory.isUseableByPlayer(par1EntityPlayer);
 	}
 	
 	@Override
-	public boolean canInteractWith(EntityPlayer entityplayer)
+	public ItemStack transferStackInSlot(EntityPlayer player, int slotNum)
 	{
-		return true;
+		ItemStack itemstack = null;
+		Slot slot = (Slot)this.inventorySlots.get(slotNum);
+		
+		if(slot != null && slot.getHasStack())
+		{
+			ItemStack itemstack1 = slot.getStack();
+			itemstack = itemstack1.copy();
+			
+			if(slotNum == 0)
+			{
+				if(!this.mergeItemStack(itemstack1, 1, 37, true))
+				{
+					return null;
+				}
+				
+				slot.onSlotChange(itemstack1, itemstack);
+			} else
+			{
+				if(slotNum >= 1 && slotNum < 37 && !this.mergeItemStack(itemstack1, 0, 1, false))
+				{
+					return null;
+				}
+			}
+			
+			if(itemstack1.stackSize == 0)
+			{
+				slot.putStack((ItemStack)null);
+			} else
+			{
+				slot.onSlotChanged();
+			}
+			
+			if(itemstack1.stackSize == itemstack.stackSize)
+			{
+				return null;
+			}
+			
+			slot.onPickupFromSlot(player, itemstack1);
+		}
+		
+		return itemstack;
 	}
 	
-	@Override
-	public ItemStack transferStackInSlot(EntityPlayer player, int slot)
+	public void updatePage(int newPageNum)
 	{
-		return null;
-	}
-	
-	public void updatePage(int newPageNum, int newX, int newY)
-	{
-		this.inventorySlots.clear();
-		this.inventoryItemStacks.clear();
 		this.pageNum = newPageNum;
-		this.x = newX;
-		this.y = newY;
 		
 		if(pageNum == 1)
 		{
+			Slot tSlot = this.getSlot(0);
+			tSlot.xDisplayPosition = 8;
+			tSlot.yDisplayPosition = 18;
+			
 			for(int i = 0; i < 3; i++)
 			{
 				for(int j = 0; j < 9; j++)
 				{
-					this.addSlotToContainer(new Slot(playerInv, (i * 9) + 9 + j, x + 44 + j * 18, y + 133 + i * 18));
-					((Slot)this.inventorySlots.get(this.inventorySlots.size() - 1)).putStack(new ItemStack(Block.stone, (i * 9) + 9 + j));
-					EconomyMod.logger.log(Level.INFO, "Adding slot '" + ((i * 9) + 9 + j) + " to ContainerTrader");
+					Slot slot = this.getSlot((i * 9) + 9 + j + 1);
+					slot.xDisplayPosition = 44 + (j * 18);
+					slot.yDisplayPosition = 133 + (i * 18);
 				}
 			}
 			
 			for(int i = 0; i < 9; i++)
 			{
-				this.addSlotToContainer(new Slot(playerInv, i, x + 44 + i * 18, y + 191));
-				((Slot)this.inventorySlots.get(this.inventorySlots.size() - 1)).putStack(new ItemStack(Block.stone, i));
-				EconomyMod.logger.log(Level.INFO, "Adding slot '" + i + " to ContainerTrader");
+				Slot slot = this.getSlot(i + 1);
+				slot.xDisplayPosition = 44 + (i * 18);
+				slot.yDisplayPosition = 191;
+			}
+		} else
+		{
+			for(int i = 0; i < this.inventorySlots.size(); i++)
+			{
+				Slot slot = this.getSlot(i);
+				slot.xDisplayPosition = -999;
+				slot.yDisplayPosition = -999;
 			}
 		}
+	}
+	
+	/**
+	 * Called when the container is closed.
+	 */
+	public void onContainerClosed(EntityPlayer par1EntityPlayer)
+	{
+		super.onContainerClosed(par1EntityPlayer);
+		ItemStack stack = this.traderInventory.getStackInSlotOnClosing(0);
+		if(stack != null)
+		{
+			par1EntityPlayer.dropPlayerItem(stack);
+		}
+		this.traderInventory.closeChest();
 	}
 }

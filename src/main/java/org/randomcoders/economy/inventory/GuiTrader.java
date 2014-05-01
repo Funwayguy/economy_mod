@@ -1,23 +1,16 @@
 package org.randomcoders.economy.inventory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.logging.Level;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import org.randomcoders.economy.core.EconomyMod;
-import org.randomcoders.economy.handlers.packets.PacketHandler;
+import org.randomcoders.economy.blocks.TileEntityTrader;
 import org.randomcoders.economy.handlers.trading.HandlerTradeDB;
 import org.randomcoders.economy.handlers.trading.TradeInstance;
-import cpw.mods.fml.common.network.PacketDispatcher;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
@@ -67,24 +60,25 @@ public class GuiTrader extends GuiContainer
 	
 	public EntityPlayer playerUser;
 	
-	public GuiTrader(InventoryPlayer playerInvo)
+	public GuiTrader(InventoryPlayer playerInvo, TileEntityTrader tile)
 	{
-		super(new ContainerTrader(playerInvo));
+		super(new ContainerTrader(playerInvo, tile));
 		playerUser = playerInvo.player;
 		containerTrader = (ContainerTrader)this.inventorySlots;
-		containerTrader.trader = this;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void initGui()
-	{
+		
 		curPage = 0;
 		
 		xSize = buySizeX;
 		ySize = buySizeY;
-		
+	}
+	
+	@Override
+	public void initGui()
+	{
 		reloadButtons();
 		reloadContainer();
+		
+		super.initGui();
 	}
 	
 	public void actionPerformed(GuiButton button)
@@ -98,8 +92,7 @@ public class GuiTrader extends GuiContainer
 					xSize = buySizeX;
 					ySize = buySizeY;
 					curPage = 0;
-					reloadButtons();
-					reloadContainer();
+					this.initGui();
 				}
 				break;
 			}
@@ -110,8 +103,7 @@ public class GuiTrader extends GuiContainer
 					xSize = sellSizeX;
 					ySize = sellSizeY;
 					curPage = 1;
-					reloadButtons();
-					reloadContainer();
+					this.initGui();
 				}
 				break;
 			}
@@ -122,8 +114,7 @@ public class GuiTrader extends GuiContainer
 					xSize = tradesSizeX;
 					ySize = tradesSizeY;
 					curPage = 2;
-					reloadButtons();
-					reloadContainer();
+					this.initGui();
 				}
 				break;
 			}
@@ -134,45 +125,18 @@ public class GuiTrader extends GuiContainer
 					xSize = marketSizeX;
 					ySize = marketSizeY;
 					curPage = 3;
-					reloadButtons();
-					reloadContainer();
+					this.initGui();
 				}
 				break;
 			}
 		}
 		
 		scrollPos = 0;
-		
-		/*if(EconomyMod.proxy.isClient())
-		{
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			DataOutputStream outputStream = new DataOutputStream(bos);
-			try
-			{
-				outputStream.writeInt(PacketHandler.GUI_ID);
-				outputStream.writeInt(this.curPage);
-				outputStream.writeInt(this.getPosX());
-				outputStream.writeInt(this.getPosY());
-				outputStream.writeInt(this.playerUser.entityId);
-				outputStream.writeInt(this.playerUser.dimension);
-			} catch(IOException e)
-			{
-				e.printStackTrace();
-				return;
-			}
-			
-			Packet250CustomPayload packet = new Packet250CustomPayload();
-			packet.channel = PacketHandler.channel;
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			PacketDispatcher.sendPacketToServer(packet);
-			EconomyMod.logger.log(Level.INFO, "Sent page change packet to server...");
-		}*/
 	}
 	
 	public void reloadContainer()
 	{
-		containerTrader.updatePage(curPage, this.getPosX(), this.getPosY());
+		containerTrader.updatePage(curPage);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -231,35 +195,32 @@ public class GuiTrader extends GuiContainer
 	@Override
 	protected void drawGuiContainerForegroundLayer(int param1, int param2)
 	{
-		int posX = (this.width - xSize) / 2;
-		int posY = (this.height - ySize) / 2;
-		
-		fontRenderer.drawString("Trader", posX + 8, posY + 8, 4210752);
+		fontRenderer.drawString("Trader", 8, 8, 4210752);
 		
 		switch(curPage)
 		{
 			case 0:
 			{
-				fontRenderer.drawString("No.", posX + 112, posY + 52, 4210752);
-				fontRenderer.drawString("Offer", posX + 160, posY + 52, 4210752);
+				fontRenderer.drawString("No.", 112, 52, 4210752);
+				fontRenderer.drawString("Offer", 160, 52, 4210752);
 				break;
 			}
 			case 1:
 			{
-				fontRenderer.drawString("Price Per Item", posX + 24, posY + 84, 4210752);
-				fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), posX + 43, posY + 120, 4210752);
+				fontRenderer.drawString("Price Per Item", 24, 84, 4210752);
+				fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), 43, 120, 4210752);
 				break;
 			}
 			case 2:
 			{
-				fontRenderer.drawString("Buying", posX + 24, posY + 52, 4210752);
-				fontRenderer.drawString("Selling", posX + 88, posY + 52, 4210752);
-				fontRenderer.drawString("Complete", posX + 160, posY + 52, 4210752);
+				fontRenderer.drawString("Buying", 24, 52, 4210752);
+				fontRenderer.drawString("Selling", 88, 52, 4210752);
+				fontRenderer.drawString("Complete", 160, 52, 4210752);
 				break;
 			}
 			case 3:
 			{
-				fontRenderer.drawString("Market History", posX + 112, posY + 52, 4210752);
+				fontRenderer.drawString("Market History", 112, 52, 4210752);
 				break;
 			}
 		}
@@ -303,12 +264,8 @@ public class GuiTrader extends GuiContainer
 		{
 			for(int i = 0; i < HandlerTradeDB.buyList.size(); i++)
 			{
-				//this.drawTexturedModelRectFromIcon(x, y, HandlerTradeDB.buyList.get(i).tradeItem.getIconIndex(), 16, 16);
-				//28, 68
-				
 				TradeInstance trade = HandlerTradeDB.buyList.get(i);
 				
-				//itemRender.renderItemIntoGUI(fontRenderer, this.mc.getTextureManager(), item, x + 28, y + 68 + (i * 20));
 				this.drawItemStack(trade.tradeItem, x + 28, y + 68 + (i * 20), trade.tradeItem.stackSize > 1? "" + trade.tradeItem.stackSize : "");
 				
 				fontRenderer.drawString("$" + trade.getDisplayValue(), x + 52, y + 68 + (i * 20) + 4, 4210752);
@@ -316,12 +273,8 @@ public class GuiTrader extends GuiContainer
 			
 			for(int i = 0; i < HandlerTradeDB.sellList.size(); i++)
 			{
-				//this.drawTexturedModelRectFromIcon(x, y, HandlerTradeDB.buyList.get(i).tradeItem.getIconIndex(), 16, 16);
-				//28, 68
-				
 				TradeInstance trade = HandlerTradeDB.sellList.get(i);
 				
-				//itemRender.renderItemIntoGUI(fontRenderer, this.mc.getTextureManager(), item, x + 92, y + 68 + (i * 20));
 				this.drawItemStack(trade.tradeItem, x + 92, y + 68 + (i * 20), trade.tradeItem.stackSize > 1? "" + trade.tradeItem.stackSize : "");
 				
 				fontRenderer.drawString("$" + trade.getDisplayValue(), x + 116, y + 68 + (i * 20) + 4, 4210752);

@@ -22,6 +22,7 @@ public class CommonProxy
 		HandlerConfig.LoadGlobalConfigs(event);
 		HandlerBlocks.LoadBlocks();
 		HandlerItems.LoadItems();
+		HandlerTileEntities.RegisterTileEntities();
 		HandlerLanguage.LoadLocalisations();
 		MinecraftForge.EVENT_BUS.register(new HandlerEvents());
 	}

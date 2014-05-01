@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.logging.Level;
 import org.randomcoders.economy.core.EconomyMod;
 import org.randomcoders.economy.handlers.HandlerConfig;
 import net.minecraft.item.Item;
@@ -118,7 +119,26 @@ public class HandlerEconomy
 			return;
 		}
 		
+		if(HandlerConfig.worldDir == null)
+		{
+			EconomyMod.logger.log(Level.WARNING, "World directory could not be found!");;
+			EconomyMod.logger.log(Level.WARNING, "Economy database failed to save as a result!");
+			EconomyMod.logger.log(Level.WARNING, "Database will revert to last save on restart!");
+			return;
+		}
+		
 		File ecoDB = new File(HandlerConfig.worldDir.getAbsolutePath(), "EconomyDB");
+		
+		if(!ecoDB.exists())
+		{
+			try
+			{
+				ecoDB.createNewFile();
+			} catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
 		
 		try
 		{

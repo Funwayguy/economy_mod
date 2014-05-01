@@ -16,20 +16,20 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 
-public class BlockTrader extends BlockContainer
+public class BlockPostbox extends BlockContainer
 {
 	public Icon frontIcon;
 	public Icon sideIcon;
 	public Icon topIcon;
 	
-	public BlockTrader(int id, Material material)
+	public BlockPostbox(int par1, Material par2Material)
 	{
-		super(id, material);
+		super(par1, par2Material);
 		setHardness(5);
 		setStepSound(Block.soundMetalFootstep);
-		setCreativeTab(EconomyMod.economyTab);
-		setUnlocalizedName("economy.block.trader");
-		setTextureName("economy:block_trader");
+		this.setCreativeTab(EconomyMod.economyTab);
+		setUnlocalizedName("economy.block.postbox");
+		setTextureName("economy:block_postbox");
 		MinecraftForge.setBlockHarvestLevel(this, "pickaxe", 0);
 	}
 	
@@ -43,26 +43,15 @@ public class BlockTrader extends BlockContainer
 	
 	public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
 	{
-		TileEntity tile = par1World.getBlockTileEntity(par2, par3, par4);
-		
-		if(tile instanceof TileEntityTrader)
+		if(par1World.isRemote)
 		{
-			if(((TileEntityTrader)tile).inUse)
-			{
-				return false;
-			}
-			
-			if(par1World.isRemote)
-			{
-				return true;
-			} else
-			{
-				par5EntityPlayer.openGui(EconomyMod.instance, 0, par1World, par2, par3, par4);
-				return true;
-			}
+			//par5EntityPlayer.openGui(EconomyMod.instance, 1, par1World, par2, par3, par4);
+			return true;
+		} else
+		{
+			par5EntityPlayer.openGui(EconomyMod.instance, 1, par1World, par2, par3, par4);
+			return true;
 		}
-		
-		return false;
 	}
 
     /**
@@ -150,6 +139,6 @@ public class BlockTrader extends BlockContainer
 	@Override
 	public TileEntity createNewTileEntity(World world)
 	{
-		return new TileEntityTrader();
+		return new TileEntityPostbox();
 	}
 }
