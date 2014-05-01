@@ -156,9 +156,9 @@ public class GuiTrader extends GuiContainer
 		{
 			case 0:
 			{
-				deliverButton = new GuiButton(0, posX + 112, posY + 88, 48, 20, "Deliver");
-				pickupButton = new GuiButton(0, posX + 176, posY + 88, 48, 20, "Pickup");
-				confirmButton = new GuiButton(4, posX + 24, posY + 152, 200, 20, "Confirm");
+				deliverButton = new GuiButton(4, posX + 112, posY + 88, 48, 20, "Deliver");
+				pickupButton = new GuiButton(5, posX + 176, posY + 88, 48, 20, "Pickup");
+				confirmButton = new GuiButton(6, posX + 24, posY + 152, 200, 20, "Confirm");
 				this.buttonList.add(deliverButton);
 				this.buttonList.add(pickupButton);
 				this.buttonList.add(confirmButton);
@@ -166,7 +166,7 @@ public class GuiTrader extends GuiContainer
 			}
 			case 1:
 			{
-				confirmButton = new GuiButton(4, posX + 24, posY + 216, 200, 20, "Confirm");
+				confirmButton = new GuiButton(7, posX + 24, posY + 216, 200, 20, "Confirm");
 				this.buttonList.add(confirmButton);
 				break;
 			}

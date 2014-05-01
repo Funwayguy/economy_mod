@@ -1,5 +1,6 @@
 package org.randomcoders.economy.blocks;
 
+import org.randomcoders.economy.handlers.trading.HandlerEconomy;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;

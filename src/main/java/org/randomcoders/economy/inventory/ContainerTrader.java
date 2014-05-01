@@ -18,7 +18,7 @@ public class ContainerTrader extends Container
 		this.traderInventory = trader;
 		trader.openChest();
 		
-		this.addSlotToContainer(new Slot(trader, 0, 8, 18));
+		this.addSlotToContainer(new Slot(trader, 0, 24, 56));
 		
 		int j;
 		int k;
@@ -95,8 +95,8 @@ public class ContainerTrader extends Container
 		if(pageNum == 1)
 		{
 			Slot tSlot = this.getSlot(0);
-			tSlot.xDisplayPosition = 8;
-			tSlot.yDisplayPosition = 18;
+			tSlot.xDisplayPosition = 24;
+			tSlot.yDisplayPosition = 56;
 			
 			for(int i = 0; i < 3; i++)
 			{
