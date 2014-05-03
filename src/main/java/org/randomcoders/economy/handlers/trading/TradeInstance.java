@@ -7,13 +7,18 @@ public class TradeInstance
 	public ItemStack tradeItem;
 	public int tradeValue;
 	public String tradeOwner;
-	public String tradeType;
+	
+	public boolean allowNamed;
+	public int damageType;
+	public int damageValue;
 	
 	public TradeInstance(ItemStack item, int value, String owner)
 	{
 		this.tradeItem = item;
 		this.tradeValue = value;
 		this.tradeOwner = owner;
+		this.allowNamed = false;
+		this.damageType = 0;
 	}
 	
 	public String getDisplayValue()

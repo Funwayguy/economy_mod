@@ -15,12 +15,14 @@ import java.util.Random;
 import java.util.logging.Level;
 import org.randomcoders.economy.core.EconomyMod;
 import org.randomcoders.economy.handlers.HandlerConfig;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.Item;
 import net.minecraft.world.World;
 
 public class HandlerEconomy
 {
 	public static HashMap<Integer, ItemInfo> economyDB = new HashMap<Integer, ItemInfo>();
+	public static HashMap<Integer, ItemInfo> enchantDB = new HashMap<Integer, ItemInfo>();
 	public static int prevDay;
 	
 	public static void LoadPriceList()
@@ -34,6 +36,16 @@ public class HandlerEconomy
 				ItemInfo iInfo = new ItemInfo(i, rand.nextInt(1000));
 				
 				economyDB.put(i, iInfo);
+			}
+		}
+		
+		for(int i = 0; i < Enchantment.enchantmentsList.length; i++)
+		{
+			if(Enchantment.enchantmentsList[i] != null)
+			{
+				ItemInfo iInfo = new ItemInfo(i, rand.nextInt(1000));
+				
+				enchantDB.put(i, iInfo);
 			}
 		}
 	}
@@ -58,9 +70,18 @@ public class HandlerEconomy
 				ItemInfo entry = iterator.next();
 				entry.UpdatePrice(curDay);
 			}
+			
+			Iterator<ItemInfo> iterator2 = enchantDB.values().iterator();
+			
+			while(iterator2.hasNext())
+			{
+				ItemInfo entry = iterator2.next();
+				entry.UpdatePrice(curDay);
+			}
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void LoadDB()
 	{
 		File ecoDB = new File(HandlerConfig.worldDir.getAbsolutePath(), "EconomyDB");
@@ -84,6 +105,7 @@ public class HandlerEconomy
 				fileIn.close();
 				
 				economyDB = new HashMap<Integer, ItemInfo>();
+				enchantDB = new HashMap<Integer, ItemInfo>();
 				
 				Iterator<HashMap<String, HashMap>> iterator = loadedDB.iterator();
 				
@@ -91,6 +113,7 @@ public class HandlerEconomy
 				{
 					HashMap<String, HashMap> entry = iterator.next();
 					
+					int dbType = (int)entry.get("General").get("DB");
 					int itemID = (int)entry.get("General").get("itemID");
 					int currentWorth = (int)entry.get("General").get("currentWorth");
 					int totalSpentToday = (int)entry.get("General").get("totalSpentToday");
@@ -103,7 +126,13 @@ public class HandlerEconomy
 					loadedInfo.demandHistory = entry.get("DemandHistory");
 					loadedInfo.supplyHistory = entry.get("SupplyHistory");
 					
-					economyDB.put(itemID, loadedInfo);
+					if(dbType == 1)
+					{
+						enchantDB.put(itemID, loadedInfo);
+					} else
+					{
+						economyDB.put(itemID, loadedInfo);
+					}
 				}
 			} catch(IOException | ClassNotFoundException | ClassCastException e)
 			{
@@ -114,7 +143,7 @@ public class HandlerEconomy
 	
 	public static void SaveDB()
 	{
-		if(economyDB == null || economyDB.size() < 0)
+		if(economyDB == null || enchantDB == null)
 		{
 			return;
 		}
@@ -153,8 +182,19 @@ public class HandlerEconomy
 			while(iterator.hasNext())
 			{
 				ItemInfo entry = iterator.next();
-				
-				saveDB.add(entry.GetSerializableFormat());
+				HashMap<String, HashMap> formattedInfo = entry.GetSerializableFormat();
+				formattedInfo.get("General").put("DB", 0);
+				saveDB.add(formattedInfo);
+			}
+			
+			Iterator<ItemInfo> iterator2 = enchantDB.values().iterator();
+			
+			while(iterator2.hasNext())
+			{
+				ItemInfo entry = iterator2.next();
+				HashMap<String, HashMap> formattedInfo = entry.GetSerializableFormat();
+				formattedInfo.get("General").put("DB", 1);
+				saveDB.add(formattedInfo);
 			}
 			
 			objOut.writeObject(saveDB);
