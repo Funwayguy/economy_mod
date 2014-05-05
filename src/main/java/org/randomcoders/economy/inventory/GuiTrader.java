@@ -1,6 +1,7 @@
 package org.randomcoders.economy.inventory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.randomcoders.economy.blocks.TileEntityTrader;
@@ -60,6 +61,8 @@ public class GuiTrader extends GuiContainer
 	
 	public boolean allowNames;
 	public int damageType;
+	public HashMap<Integer, Integer> buyEnchants = new HashMap<Integer, Integer>();
+	public ArrayList<Integer> dispEnchants = new ArrayList<Integer>();
 	public GuiTextField optionDamageBox;
 	
 	public GuiButton deliverButton;
@@ -81,10 +84,16 @@ public class GuiTrader extends GuiContainer
 	
 	public EntityPlayer playerUser;
 	
+	public HashMap<Integer, ItemInfo> tmpEconDB = new HashMap<Integer, ItemInfo>();
+	public HashMap<Integer, ItemInfo> tmpEnchDB = new HashMap<Integer, ItemInfo>();
+	public int requestCooldown = 0;
+	public int curDay;
+	
 	public GuiTrader(InventoryPlayer playerInvo, TileEntityTrader tile)
 	{
 		super(new ContainerTrader(playerInvo, tile));
 		playerUser = playerInvo.player;
+		curDay = (int)Math.floor(playerUser.worldObj.getWorldTime()/24000D);
 		containerTrader = (ContainerTrader)this.inventorySlots;
 		
 		curPage = 0;
@@ -112,6 +121,8 @@ public class GuiTrader extends GuiContainer
 			buttonCooldown = false;
 			return;
 		}
+		
+		int oldPage = curPage;
 		
 		switch(button.id)
 		{
@@ -185,7 +196,11 @@ public class GuiTrader extends GuiContainer
 			}
 		}
 		
-		scrollPos = 0;
+		if(oldPage != curPage)
+		{
+			scrollPos = 0;
+		}
+		
 		buttonCooldown = true;
 	}
 	
@@ -426,6 +441,22 @@ public class GuiTrader extends GuiContainer
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float par1, int par2, int par3)
 	{
+		if(requestCooldown > 0)
+		{
+			requestCooldown--;
+		} else if(requestCooldown < 0)
+		{
+			requestCooldown = 0;
+		}
+		
+		if((int)Math.floor(playerUser.worldObj.getWorldTime()/24000D) != curDay)
+		{
+			curDay = (int)Math.floor(playerUser.worldObj.getWorldTime()/24000D);
+			tmpEconDB.clear();
+			tmpEnchDB.clear();
+			requestCooldown = 0;
+		}
+		
 		ResourceLocation texture = noGui;
 		
 		switch(curPage)
@@ -464,9 +495,33 @@ public class GuiTrader extends GuiContainer
 		
 		if(curPage == 4)
 		{
+			ArrayList<Enchantment> enchList = new ArrayList<Enchantment>();
+			
 			for(int i = 0; i < Enchantment.enchantmentsList.length; i++)
 			{
-				
+				if(Enchantment.enchantmentsList[i] != null)
+				{
+					enchList.add(Enchantment.enchantmentsList[i]);
+				}
+			}
+			
+			if(scrollPos*3 > enchList.size())
+			{
+				scrollPos--;
+			}
+			
+			dispEnchants.clear();
+			
+			for(int i = 0; i + (scrollPos*3) < enchList.size() && i < 3; i++)
+			{
+				int index = i + (scrollPos*3);
+				int eID = enchList.get(index).effectId;
+				dispEnchants.add(eID);
+				fontRenderer.drawSplitString(StatCollector.translateToLocal(enchList.get(index).getName()), x + 32, y + 64 + (i*32), 64, 14737632);
+				fontRenderer.drawString(buyEnchants.containsKey(eID)? (buyEnchants.get(eID) == 0? "Any" : "Lvl " + buyEnchants.get(eID)) : "None", x + 32, y + 84 + (i*32), 14737632);
+				this.mc.renderEngine.bindTexture(texture);
+				this.drawTexturedModalRect(x + 80, y + 80 + (i*32), 0, 184, 16, 8);
+				this.drawTexturedModalRect(x + 80, y + 88 + (i*32), 16, 184, 16, 8);
 			}
 		} else if(curPage == 3)
 		{
@@ -580,7 +635,8 @@ public class GuiTrader extends GuiContainer
 		{
 			if(buyItem != null)
 			{
-				this.drawItemStack(buyItem, x + 120, y + 120, "" + (buyItem.stackSize > 0? buyItem.stackSize : ""));
+				buyItem.stackSize = this.GetAmountFromString(this.buyAmountBox.getText());
+				this.drawItemStack(buyItem, x + 120, y + 120, "" + (buyItem.stackSize > 1? buyItem.stackSize : ""));
 			}
 		}
 	}
@@ -617,6 +673,50 @@ public class GuiTrader extends GuiContainer
         	case 4:
         	{
         		optionDamageBox.mouseClicked(par1, par2, par3);
+        		
+        		if(par3 == 0)
+        		{
+	        		for(int i = 0; i < dispEnchants.size(); i++)
+	        		{
+                        int eID = dispEnchants.get(i);
+                        
+                        if(Enchantment.enchantmentsList[eID] == null)
+                        {
+                        	System.out.println("Unable to find enchantment with ID " + eID);
+                        	continue;
+                        }
+                        
+	        			if(this.isPointInRegion(80, 80 + (i*32), 16, 8, par1, par2))
+	        			{
+	                        this.mc.sndManager.playSoundFX("random.click", 1.0F, 1.0F);
+	                        
+	        				if(buyEnchants.containsKey(eID))
+	        				{
+	        					if(buyEnchants.get(eID) < Enchantment.enchantmentsList[eID].getMaxLevel())
+	        					{
+	        						buyEnchants.put(eID, buyEnchants.get(eID) + 1);
+	        					}
+	        				} else
+	        				{
+	        					buyEnchants.put(eID, 1);
+	        				}
+	        			} else if(this.isPointInRegion(80, 88 + (i*32), 16, 8, par1, par2))
+	        			{
+	                        this.mc.sndManager.playSoundFX("random.click", 1.0F, 1.0F);
+	                        
+	        				if(buyEnchants.containsKey(eID))
+	        				{
+	        					if(buyEnchants.get(eID) > 1)
+	        					{
+	        						buyEnchants.put(eID, buyEnchants.get(eID) - 1);
+	        					} else
+	        					{
+	        						buyEnchants.remove(eID);
+	        					}
+	        				}
+	        			}
+	        		}
+        		}
         		break;
         	}
         }
@@ -766,6 +866,21 @@ public class GuiTrader extends GuiContainer
     		return sOut.toString();
     	}
     }
+    
+    public int GetAmountFromString(String sIn)
+    {
+    	String numStr = this.StringToAmount(sIn);
+    	int numOut = 0;
+    	
+    	try
+    	{
+    		numOut = Integer.parseInt(numStr);
+    	} catch(NumberFormatException e)
+    	{
+    	}
+    	
+    	return numOut;
+    }
 
     private void drawItemStack(ItemStack par1ItemStack, int par2, int par3, String par4Str)
     {
@@ -796,4 +911,32 @@ public class GuiTrader extends GuiContainer
         return null;
     }
 	
+	public ItemInfo requestItemInfo(int itemID)
+	{
+		if(tmpEconDB.containsKey(itemID))
+		{
+			return tmpEconDB.get(itemID);
+		}
+		
+		if(requestCooldown == 0)
+		{
+			// TODO: Send packet to server requesting this item's info profile
+		}
+		return null;
+	}
+	
+	public ItemInfo requestEnchantInfo(int enchantID)
+	{
+		if(tmpEnchDB.containsKey(enchantID))
+		{
+			return tmpEnchDB.get(enchantID);
+		}
+		
+		if(requestCooldown == 0)
+		{
+			// TODO: Send packet to server requesting this enchantment's info profile
+		}
+		
+		return null;
+	}
 }
