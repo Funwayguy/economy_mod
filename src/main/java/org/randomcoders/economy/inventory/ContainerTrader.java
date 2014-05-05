@@ -102,7 +102,7 @@ public class ContainerTrader extends Container
 			{
 				for(int j = 0; j < 9; j++)
 				{
-					Slot slot = this.getSlot((i * 9) + 9 + j + 1);
+					Slot slot = this.getSlot((i * 9) + j + 1);
 					slot.xDisplayPosition = 44 + (j * 18);
 					slot.yDisplayPosition = 133 + (i * 18);
 				}
@@ -110,7 +110,7 @@ public class ContainerTrader extends Container
 			
 			for(int i = 0; i < 9; i++)
 			{
-				Slot slot = this.getSlot(i + 1);
+				Slot slot = this.getSlot(i + 1 + 27);
 				slot.xDisplayPosition = 44 + (i * 18);
 				slot.yDisplayPosition = 191;
 			}

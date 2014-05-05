@@ -33,7 +33,7 @@ public class HandlerEconomy
 		{
 			if(Item.itemsList[i] != null)
 			{
-				ItemInfo iInfo = new ItemInfo(i, rand.nextInt(1000));
+				ItemInfo iInfo = new ItemInfo(i, rand.nextInt(10000000));
 				
 				economyDB.put(i, iInfo);
 			}
@@ -43,7 +43,7 @@ public class HandlerEconomy
 		{
 			if(Enchantment.enchantmentsList[i] != null)
 			{
-				ItemInfo iInfo = new ItemInfo(i, rand.nextInt(1000));
+				ItemInfo iInfo = new ItemInfo(i, rand.nextInt(10000000));
 				
 				enchantDB.put(i, iInfo);
 			}
@@ -207,12 +207,18 @@ public class HandlerEconomy
 			return;
 		}
 	}
-
-	public static void SyncWithServer()
+	
+	public static String GetDisplayCost(int value)
 	{
-		if(EconomyMod.proxy.isClient())
+		if(value < 1000)
 		{
-			return;
+			return "$" + value;
+		} else if(value < 1000000)
+		{
+			return "$" + (Math.round(value/100D))/10D + "K";
+		} else
+		{
+			return "$" + (Math.round(value/100000D))/10D + "M";
 		}
 	}
 }

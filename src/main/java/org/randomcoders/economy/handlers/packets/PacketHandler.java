@@ -24,6 +24,7 @@ public class PacketHandler implements IPacketHandler
 	public static final int TRADER_ID = 0;
 	public static final int ECONOMY_ID = 1;
 	public static final int GUI_ID = 2;
+	public static final int NOTICE_ID = 3;
 	
 	@Override
 	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player)
@@ -59,6 +60,12 @@ public class PacketHandler implements IPacketHandler
 				
 				case GUI_ID:
 				{
+					break;
+				}
+				
+				case NOTICE_ID:
+				{
+					PacketNotice.handleNoticePacket(packet);
 					break;
 				}
 			}

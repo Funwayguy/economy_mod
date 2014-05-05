@@ -20,18 +20,4 @@ public class TradeInstance
 		this.allowNamed = false;
 		this.damageType = 0;
 	}
-	
-	public String getDisplayValue()
-	{
-		if(tradeValue < 1000)
-		{
-			return "" + tradeValue;
-		} else if(tradeValue < 1000000)
-		{
-			return "" + (Math.round(tradeValue/100D))/10D + "K";
-		} else
-		{
-			return "" + (Math.round(tradeValue/100000D))/10D + "M";
-		}
-	}
 }

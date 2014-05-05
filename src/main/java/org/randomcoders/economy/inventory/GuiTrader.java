@@ -10,12 +10,12 @@ import org.randomcoders.economy.handlers.trading.ItemInfo;
 import org.randomcoders.economy.handlers.trading.TradeInstance;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -60,23 +60,23 @@ public class GuiTrader extends GuiContainer
 	
 	public boolean allowNames;
 	public int damageType;
-	public int damageValue;
+	public GuiTextField optionDamageBox;
 	
 	public GuiButton deliverButton;
 	public GuiButton pickupButton;
 	
 	public int curPage;
-	public int scrollPos;
+	public int scrollPos = 0;
+	public boolean buttonCooldown = false;
 	
-	public ItemStack sellItem;
-	public String sellOffer;
+	public GuiTextField sellOfferBox;
 	
 	public ItemStack buyItem;
-	public String buySearch;
-	public String buyAmount;
-	public String buyOffer;
+	public GuiTextField buySearchBox;
+	public GuiTextField buyAmountBox;
+	public GuiTextField buyOfferBox;
 	
-	public String marketSearch;
+	public GuiTextField marketSearchBox;
 	public ContainerTrader containerTrader;
 	
 	public EntityPlayer playerUser;
@@ -91,19 +91,28 @@ public class GuiTrader extends GuiContainer
 		
 		xSize = buySizeX;
 		ySize = buySizeY;
+		
+		buyItem = new ItemStack(Item.pickaxeDiamond);
 	}
 	
 	@Override
 	public void initGui()
 	{
-		reloadButtons();
-		reloadContainer();
-		
 		super.initGui();
+		
+		reloadButtons();
+		reloadTextFields();
+		reloadContainer();
 	}
 	
 	public void actionPerformed(GuiButton button)
 	{
+		if(buttonCooldown)
+		{
+			buttonCooldown = false;
+			return;
+		}
+		
 		switch(button.id)
 		{
 			case 0:
@@ -161,14 +170,128 @@ public class GuiTrader extends GuiContainer
 				}
 				break;
 			}
+			case 11:
+			{
+				if(scrollPos > 0)
+				{
+					scrollPos--;
+				}
+				break;
+			}
+			case 12:
+			{
+				scrollPos++;
+				break;
+			}
 		}
 		
 		scrollPos = 0;
+		buttonCooldown = true;
 	}
 	
 	public void reloadContainer()
 	{
 		containerTrader.updatePage(curPage);
+	}
+	
+	public void reloadTextFields()
+	{
+		
+		int x = this.getPosX();
+		int y = this.getPosY();
+		
+		String tmpTxt = buySearchBox != null? buySearchBox.getText() : "";
+		buySearchBox = new GuiTextField(fontRenderer, x + 25, y + 49, 78, 14);
+		buySearchBox.setText(tmpTxt);
+
+		tmpTxt = buyAmountBox != null? buyAmountBox.getText() : "1";
+		buyAmountBox = new GuiTextField(fontRenderer, x + 113, y + 65, 30, 14);
+		buyAmountBox.setText(tmpTxt);
+		buyAmountBox.setMaxStringLength(3);
+		
+		tmpTxt = buyOfferBox != null? buyOfferBox.getText() : "$0";
+		buyOfferBox = new GuiTextField(fontRenderer, x + 161, y + 65, 62, 14);
+		buyOfferBox.setText(tmpTxt);
+
+		tmpTxt = sellOfferBox != null? sellOfferBox.getText() : "$0";
+		sellOfferBox = new GuiTextField(fontRenderer, x + 25, y + 97, 94, 14);
+		sellOfferBox.setText(tmpTxt);
+
+		tmpTxt = marketSearchBox != null? marketSearchBox.getText() : "";
+		marketSearchBox = new GuiTextField(fontRenderer, x + 25, y + 49, 78, 14);
+		marketSearchBox.setText(tmpTxt);
+
+		tmpTxt = optionDamageBox != null? optionDamageBox.getText() : "100";
+		optionDamageBox = new GuiTextField(fontRenderer, x + 177, y + 41, 30, 14);
+		optionDamageBox.setText(tmpTxt);
+		optionDamageBox.setMaxStringLength(3);
+		
+		buySearchBox.setFocused(false);
+		buySearchBox.setVisible(false);
+		buySearchBox.setEnabled(false);
+		buySearchBox.setCanLoseFocus(true);
+		
+		buyAmountBox.setFocused(false);
+		buyAmountBox.setVisible(false);
+		buyAmountBox.setEnabled(false);
+		buyAmountBox.setCanLoseFocus(true);
+		
+		buyOfferBox.setFocused(false);
+		buyOfferBox.setVisible(false);
+		buyOfferBox.setEnabled(false);
+		buyOfferBox.setCanLoseFocus(true);
+		
+		sellOfferBox.setFocused(false);
+		sellOfferBox.setVisible(false);
+		sellOfferBox.setEnabled(false);
+		sellOfferBox.setCanLoseFocus(true);
+		
+		marketSearchBox.setFocused(false);
+		marketSearchBox.setVisible(false);
+		marketSearchBox.setEnabled(false);
+		marketSearchBox.setCanLoseFocus(true);
+		
+		optionDamageBox.setFocused(false);
+		optionDamageBox.setVisible(false);
+		optionDamageBox.setEnabled(false);
+		optionDamageBox.setCanLoseFocus(true);
+		
+		switch(curPage)
+		{
+			case 0:
+			{
+				buySearchBox.setVisible(true);
+				buySearchBox.setEnabled(true);
+				
+				buyAmountBox.setVisible(true);
+				buyAmountBox.setEnabled(true);
+				
+				buyOfferBox.setVisible(true);
+				buyOfferBox.setEnabled(true);
+				break;
+			}
+			
+			case 1:
+			{
+				sellOfferBox.setVisible(true);
+				sellOfferBox.setEnabled(true);
+				break;
+			}
+			
+			case 3:
+			{
+				marketSearchBox.setVisible(true);
+				marketSearchBox.setEnabled(true);
+				break;
+			}
+			
+			case 4:
+			{
+				optionDamageBox.setVisible(true);
+				optionDamageBox.setEnabled(true);
+				break;
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -203,7 +326,7 @@ public class GuiTrader extends GuiContainer
 			}
 			case 1:
 			{
-				confirmButton = new GuiButton(8, posX + 24, posY + 216, 200, 20, "Confirm");
+				confirmButton = new GuiButton(7, posX + 24, posY + 216, 200, 20, "Confirm");
 				this.buttonList.add(confirmButton);
 				break;
 			}
@@ -244,6 +367,16 @@ public class GuiTrader extends GuiContainer
 	public void drawScreen(int x, int y, float f)
 	{
 		super.drawScreen(x, y, f);
+		
+		buySearchBox.drawTextBox();
+		buyAmountBox.drawTextBox();
+		buyOfferBox.drawTextBox();
+		
+		sellOfferBox.drawTextBox();
+		
+		marketSearchBox.drawTextBox();
+		
+		optionDamageBox.drawTextBox();
 	}
 	
 	@Override
@@ -286,6 +419,8 @@ public class GuiTrader extends GuiContainer
 				fontRenderer.drawString("Enchantments", 24, 24, 4210752);
 			}
 		}
+		
+		buttonCooldown = false;
 	}
 	
 	@Override
@@ -327,7 +462,13 @@ public class GuiTrader extends GuiContainer
 		int y = (height - ySize) / 2;
 		this.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
 		
-		if(curPage == 3)
+		if(curPage == 4)
+		{
+			for(int i = 0; i < Enchantment.enchantmentsList.length; i++)
+			{
+				
+			}
+		} else if(curPage == 3)
 		{
 			if(this.isPointInRegion(112, 72, 104, 92, par2, par3))
 			{
@@ -342,14 +483,14 @@ public class GuiTrader extends GuiContainer
 			{
 				TradeInstance trade = HandlerTradeDB.buyList.get(i);
 				
-				fontRenderer.drawString("$" + trade.getDisplayValue(), x + 52, y + 68 + (i * 16) + 4, 14737632);
+				fontRenderer.drawString(HandlerEconomy.GetDisplayCost(trade.tradeValue), x + 52, y + 68 + (i * 16) + 4, 14737632);
 			}
 			
 			for(int i = 0; i < HandlerTradeDB.sellList.size(); i++)
 			{
 				TradeInstance trade = HandlerTradeDB.sellList.get(i);
 				
-				fontRenderer.drawString("$" + trade.getDisplayValue(), x + 116, y + 68 + (i * 16) + 4, 14737632);
+				fontRenderer.drawString(HandlerEconomy.GetDisplayCost(trade.tradeValue), x + 116, y + 68 + (i * 16) + 4, 14737632);
 			}
 			
 			for(int i = 0; i < HandlerTradeDB.buyList.size(); i++)
@@ -370,7 +511,7 @@ public class GuiTrader extends GuiContainer
 			{
 				TradeInstance trade = HandlerTradeDB.buyList.get(i);
 				
-				if(this.isPointInRegion(28, 68 + (i * 16), 16, 16, par2, par3))
+				if(this.isPointInRegion(28, 68 + (i * 16) + 1, 14, 14, par2, par3))
 				{
 					this.drawItemStackTooltip(trade.tradeItem, par2, par3);
 				}
@@ -380,7 +521,7 @@ public class GuiTrader extends GuiContainer
 			{
 				TradeInstance trade = HandlerTradeDB.sellList.get(i);
 				
-				if(this.isPointInRegion(92, 68 + (i * 16), 16, 16, par2, par3))
+				if(this.isPointInRegion(92, 68 + (i * 16) + 1, 14, 14, par2, par3))
 				{
 					this.drawItemStackTooltip(trade.tradeItem, par2, par3);
 				}
@@ -404,7 +545,7 @@ public class GuiTrader extends GuiContainer
 				
 				if(enchTags != null && iInfo != null)
 				{
-					fontRenderer.drawString("$" + iInfo.currentWorth + (sellStack.isItemDamaged()? EnumChatFormatting.RED + " -" + Math.round(((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage() * 100F)) + "%" : ""), x + 56, y + 52, 14737632);
+					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(iInfo.currentWorth) + (sellStack.isItemDamaged()? EnumChatFormatting.RED + " -" + Math.round(((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage() * 100F)) + "%" : ""), x + 56, y + 52, 14737632);
 										
 					for(int i = 0; i < enchTags.tagCount(); i++)
 					{
@@ -420,17 +561,26 @@ public class GuiTrader extends GuiContainer
 					}
 					
 					fontRenderer.drawString("" + enchTags.tagCount() + " Enchants", x + 56, y + 60, 14737632);
-					fontRenderer.drawString("+ $" + bonusCost, x + 56, y + 68, 14737632);
+					fontRenderer.drawString("+ " + HandlerEconomy.GetDisplayCost(bonusCost), x + 56, y + 68, 14737632);
 				} else if(iInfo != null)
 				{
-					fontRenderer.drawString("$" + iInfo.currentWorth + (sellStack.isItemDamaged()? EnumChatFormatting.RED + " -" + Math.round(((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage() * 100F)) + "%" : ""), x + 56, y + 60, 14737632);
+					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(iInfo.currentWorth) + (sellStack.isItemDamaged()? EnumChatFormatting.RED + " -" + Math.round(((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage() * 100F)) + "%" : ""), x + 56, y + 60, 14737632);
 				}
 				
 				if(iInfo != null)
 				{
-					float damagePercent = 1F - ((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage());
+					float damagePercent = 1F - (sellStack.isItemDamaged()? ((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage()) : 0F);
 					fontRenderer.drawString("$" + Math.round((float)(iInfo.currentWorth + bonusCost) * damagePercent), x + 28, y + 100, 14737632);
+				} else
+				{
+					fontRenderer.drawString("$0", x + 28, y + 100, 14737632);
 				}
+			}
+		} else if(curPage == 0)
+		{
+			if(buyItem != null)
+			{
+				this.drawItemStack(buyItem, x + 120, y + 120, "" + (buyItem.stackSize > 0? buyItem.stackSize : ""));
 			}
 		}
 	}
@@ -441,20 +591,179 @@ public class GuiTrader extends GuiContainer
     protected void mouseClicked(int par1, int par2, int par3)
     {
         super.mouseClicked(par1, par2, par3);
+        
+        switch(curPage)
+        {
+        	case 0:
+        	{
+        		buySearchBox.mouseClicked(par1, par2, par3);
+        		buyAmountBox.mouseClicked(par1, par2, par3);
+        		buyOfferBox.mouseClicked(par1, par2, par3);
+        		break;
+        	}
+        	
+        	case 1:
+        	{
+        		sellOfferBox.mouseClicked(par1, par2, par3);
+        		break;
+        	}
+        	
+        	case 3:
+        	{
+        		marketSearchBox.mouseClicked(par1, par2, par3);
+        		break;
+        	}
+        	
+        	case 4:
+        	{
+        		optionDamageBox.mouseClicked(par1, par2, par3);
+        		break;
+        	}
+        }
     }
     
     public void handleMouseInput()
     {
     	super.handleMouseInput();
     	
-    	int scrollDir = (int)Math.signum(Mouse.getEventDWheel());
+    	if(curPage == 0 || curPage == 3)
+    	{
+	    	int scrollDir = (int)Math.signum(Mouse.getEventDWheel());
+	    	
+	    	if(scrollPos + scrollDir <= 0)
+	    	{
+	    		scrollPos = 0;
+	    	}
+    	}
+    }
+    
+    public void keyTyped(char c, int i)
+    {
+    	if(i == 1)
+    	{
+    		this.mc.thePlayer.closeScreen();
+    	}
     	
-    	if(scrollPos + scrollDir <= 0)
+    	int keyType = !Character.isAlphabetic(c) && !Character.isDigit(c)? 0 : Character.isDigit(c)? 1 : 2;
+    	
+    	if(curPage == 0)
     	{
-    		scrollPos = 0;
-    	} else if(curPage == 0)
+    		if(buySearchBox.isFocused())
+    		{
+    			buySearchBox.textboxKeyTyped(c, i);
+    		} else if(buyAmountBox.isFocused() && keyType != 2)
+    		{
+    			buyAmountBox.textboxKeyTyped(c, i);
+    			
+    			int curPos = buyAmountBox.getCursorPosition();
+    			
+    			buyAmountBox.setText(this.StringToAmount(buyAmountBox.getText()));
+    			
+    			if(curPos > buyAmountBox.getText().length())
+    			{
+    				curPos = buyAmountBox.getText().length();
+    			}
+    			
+    			buyAmountBox.setCursorPosition(curPos);
+    		} else if(buyOfferBox.isFocused() && keyType != 2)
+    		{
+    			buyOfferBox.textboxKeyTyped(c, i);
+    			
+    			int curPos = buyOfferBox.getCursorPosition();
+    			
+    			buyOfferBox.setText(this.StringToPrice(buyOfferBox.getText()));
+    			
+    			if(curPos > buyOfferBox.getText().length())
+    			{
+    				curPos = buyOfferBox.getText().length();
+    			}
+    			
+    			buyOfferBox.setCursorPosition(curPos);
+    		}
+    	} else if(curPage == 1)
     	{
-    		//Scroll through current query list
+    		if(sellOfferBox.isFocused() && keyType != 2)
+    		{
+    			sellOfferBox.textboxKeyTyped(c, i);
+    			
+    			int curPos = sellOfferBox.getCursorPosition();
+    			
+    			sellOfferBox.setText(this.StringToPrice(sellOfferBox.getText()));
+    			
+    			if(curPos > sellOfferBox.getText().length())
+    			{
+    				curPos = sellOfferBox.getText().length();
+    			}
+    			
+    			sellOfferBox.setCursorPosition(curPos);
+    		}
+    	} else if(curPage == 3)
+    	{
+    		if(marketSearchBox.isFocused())
+    		{
+    			marketSearchBox.textboxKeyTyped(c, i);
+    		}
+    	} else if(curPage == 4)
+    	{
+    		if(optionDamageBox.isFocused() && keyType != 2)
+    		{
+    			optionDamageBox.textboxKeyTyped(c, i);
+    			
+    			int curPos = optionDamageBox.getCursorPosition();
+    			
+    			optionDamageBox.setText(this.StringToAmount(optionDamageBox.getText()));
+    			
+    			if(curPos > optionDamageBox.getText().length())
+    			{
+    				curPos = optionDamageBox.getText().length();
+    			}
+    			
+    			optionDamageBox.setCursorPosition(curPos);
+    		}
+    	}
+    }
+    
+    public String StringToPrice(String orig)
+    {
+    	char[] cArray = orig.toCharArray();
+    	StringBuilder sOut = new StringBuilder();
+    	
+    	for(int i = 0; i < cArray.length; i++)
+    	{
+    		if(Character.isDigit(cArray[i]))
+    		{
+    			sOut.append(cArray[i]);
+    		}
+    	}
+    	
+    	if(sOut.length() <= 0)
+    	{
+    		return "$";
+    	} else
+    	{
+    		return "$" + sOut.toString();
+    	}
+    }
+    
+    public String StringToAmount(String orig)
+    {
+    	char[] cArray = orig.toCharArray();
+    	StringBuilder sOut = new StringBuilder();
+    	
+    	for(int i = 0; i < cArray.length; i++)
+    	{
+    		if(Character.isDigit(cArray[i]))
+    		{
+    			sOut.append(cArray[i]);
+    		}
+    	}
+    	
+    	if(sOut.length() <= 0)
+    	{
+    		return "";
+    	} else
+    	{
+    		return sOut.toString();
     	}
     }
 
