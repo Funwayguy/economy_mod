@@ -1,7 +1,10 @@
 package org.randomcoders.economy.inventory;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.randomcoders.economy.blocks.TileEntityTrader;
@@ -13,14 +16,18 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
@@ -63,6 +70,7 @@ public class GuiTrader extends GuiContainer
 	public int damageType;
 	public HashMap<Integer, Integer> buyEnchants = new HashMap<Integer, Integer>();
 	public ArrayList<Integer> dispEnchants = new ArrayList<Integer>();
+	public ArrayList<ItemStack> dispItems = new ArrayList<ItemStack>();
 	public GuiTextField optionDamageBox;
 	
 	public GuiButton deliverButton;
@@ -100,8 +108,6 @@ public class GuiTrader extends GuiContainer
 		
 		xSize = buySizeX;
 		ySize = buySizeY;
-		
-		buyItem = new ItemStack(Item.pickaxeDiamond);
 	}
 	
 	@Override
@@ -133,6 +139,19 @@ public class GuiTrader extends GuiContainer
 					xSize = buySizeX;
 					ySize = buySizeY;
 					curPage = 0;
+					
+					if(buyItem != null)
+					{
+						buyItem = new ItemStack(buyItem.getItem(), buyItem.stackSize);
+						
+						for(int i = 0; i < Enchantment.enchantmentsList.length; i++)
+						{
+							if(buyEnchants.containsKey(i))
+							{
+								buyItem.addEnchantment(Enchantment.enchantmentsList[i], buyEnchants.get(i));
+							}
+						}
+					}
 					this.initGui();
 				}
 				break;
@@ -179,6 +198,25 @@ public class GuiTrader extends GuiContainer
 					curPage = 4;
 					this.initGui();
 				}
+				break;
+			}
+			case 9:
+			{
+				if(damageType < 0 || damageType >= 2)
+				{
+					damageType = 0;
+				} else
+				{
+					damageType += 1;
+				}
+				
+				damageButton.displayString = damageType == 0? "Equals" : (damageType == 1? "Below" : "Above");
+				break;
+			}
+			case 10:
+			{
+				allowNames = !allowNames;
+				namesButton.displayString = "Allow Names: " + (allowNames? "Yes" : "No");
 				break;
 			}
 			case 11:
@@ -355,8 +393,8 @@ public class GuiTrader extends GuiContainer
 			}
 			case 4:
 			{
-				damageButton = new GuiButton(9, posX + 120, posY + 38, 48, 20, "Equals");
-				namesButton = new GuiButton(10, posX + 120, posY + 62, 104, 20, "Allow Names: false");
+				damageButton = new GuiButton(9, posX + 120, posY + 38, 48, 20, damageType == 0? "Equals" : (damageType == 1? "Below" : "Above"));
+				namesButton = new GuiButton(10, posX + 120, posY + 62, 104, 20, "Allow Names: " + (allowNames? "Yes" : "No"));
 				backButton = new GuiButton(0, posX + 120, posY + 152, 104, 20, "Back");
 				pgLeftButton = new GuiButton(11, posX + 24, posY + 38, 40, 20, "<");
 				pgRightButton = new GuiButton(12, posX + 64, posY + 38, 40, 20, ">");
@@ -379,9 +417,9 @@ public class GuiTrader extends GuiContainer
 	}
 	
 	@Override
-	public void drawScreen(int x, int y, float f)
+	public void drawScreen(int par1, int par2, float f)
 	{
-		super.drawScreen(x, y, f);
+		super.drawScreen(par1, par2, f);
 		
 		buySearchBox.drawTextBox();
 		buyAmountBox.drawTextBox();
@@ -392,10 +430,47 @@ public class GuiTrader extends GuiContainer
 		marketSearchBox.drawTextBox();
 		
 		optionDamageBox.drawTextBox();
+		
+		if(curPage == 0)
+		{
+			if(this.isPointInRegion(121, 121, 14, 14, par1, par2) && buyItem != null)
+			{
+				this.drawItemStackTooltip(buyItem, par1, par2);
+			}
+			
+			for(int i = 0; i < dispItems.size() && i < 12; i++)
+			{
+				if(this.isPointInRegion(39 + (i%3)*20, 69 + 18*(i/3), 14, 14, par1, par2))
+				{
+					this.drawItemStackTooltip(dispItems.get(i), par1, par2);
+				}
+			}
+		} else if(curPage == 2)
+		{
+			for(int i = 0; i < HandlerTradeDB.buyList.size(); i++)
+			{
+				TradeInstance trade = HandlerTradeDB.buyList.get(i);
+				
+				if(this.isPointInRegion(28, 68 + (i * 16) + 1, 14, 14, par1, par2))
+				{
+					this.drawItemStackTooltip(trade.tradeItem, par1, par2);
+				}
+			}
+			
+			for(int i = 0; i < HandlerTradeDB.sellList.size(); i++)
+			{
+				TradeInstance trade = HandlerTradeDB.sellList.get(i);
+				
+				if(this.isPointInRegion(92, 68 + (i * 16) + 1, 14, 14, par1, par2))
+				{
+					this.drawItemStackTooltip(trade.tradeItem, par1, par2);
+				}
+			}
+		}
 	}
 	
 	@Override
-	protected void drawGuiContainerForegroundLayer(int param1, int param2)
+	protected void drawGuiContainerForegroundLayer(int par1, int par2)
 	{
 		switch(curPage)
 		{
@@ -430,7 +505,7 @@ public class GuiTrader extends GuiContainer
 			case 4:
 			{
 				fontRenderer.drawString("Trade Options", 8, 8, 4210752);
-				fontRenderer.drawString("Damage Amount", 120, 24, 4210752);
+				fontRenderer.drawString("Durability", 120, 24, 4210752);
 				fontRenderer.drawString("Enchantments", 24, 24, 4210752);
 			}
 		}
@@ -441,6 +516,8 @@ public class GuiTrader extends GuiContainer
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float par1, int par2, int par3)
 	{
+		boolean requestFlag = false;
+		
 		if(requestCooldown > 0)
 		{
 			requestCooldown--;
@@ -493,15 +570,78 @@ public class GuiTrader extends GuiContainer
 		int y = (height - ySize) / 2;
 		this.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
 		
+		if(buyItem == null)
+		{
+			buyEnchants.clear();
+			optionDamageBox.setText("100");
+			damageType = 0;
+		}
+		
+		int damage = this.GetAmountFromString(optionDamageBox.getText());
+		if(damage > 100)
+		{
+			damage = 100;
+		} else if(damage <= 0)
+		{
+			damage = 1;
+		}
+		
+		if(buyItem != null)
+		{
+			int iDamage = (!buyItem.isItemStackDamageable()? 100: damage);
+			damage = (damageType == 2 || !buyItem.isItemStackDamageable()? 100: damage);
+			if(buyItem.isItemStackDamageable())
+			{
+				buyItem.setItemDamage(buyItem.getMaxDamage() - (int)Math.round((double)buyItem.getMaxDamage() * ((double)iDamage/100D)));
+			}
+			buyItem.stackSize = this.GetAmountFromString(this.buyAmountBox.getText());
+			
+			if(buyItem.stackSize > buyItem.getMaxStackSize())
+			{
+				buyAmountBox.setText("" + buyItem.getMaxStackSize());
+				buyAmountBox.setCursorPositionEnd();
+				buyItem.stackSize = buyItem.getMaxStackSize();
+			} else if(buyItem.stackSize <= 0)
+			{
+				buyAmountBox.setText("1");
+				buyAmountBox.setCursorPositionEnd();
+				buyItem.stackSize = 1;
+			}
+		} else
+		{
+			damage = 100;
+		}
+		
 		if(curPage == 4)
 		{
 			ArrayList<Enchantment> enchList = new ArrayList<Enchantment>();
+			int eCost = 0;
+			boolean bannedEnchant = false;
 			
 			for(int i = 0; i < Enchantment.enchantmentsList.length; i++)
 			{
-				if(Enchantment.enchantmentsList[i] != null)
+				if(Enchantment.enchantmentsList[i] != null && buyItem != null)
 				{
-					enchList.add(Enchantment.enchantmentsList[i]);
+					if(Enchantment.enchantmentsList[i].canApply(buyItem) || buyItem.getItem() instanceof ItemEnchantedBook)
+					{
+						enchList.add(Enchantment.enchantmentsList[i]);
+					}
+				}
+				
+				if(buyEnchants.containsKey(i))
+				{
+					ItemInfo eInfo = this.requestEnchantInfo(i);
+					
+					if(eInfo != null && eInfo.currentWorth != -1)
+					{
+						eCost += eInfo.currentWorth * buyEnchants.get(i);
+					} else if(eInfo == null)
+					{
+						requestFlag = true;
+					} else
+					{
+						bannedEnchant = true;
+					}
 				}
 			}
 			
@@ -518,10 +658,27 @@ public class GuiTrader extends GuiContainer
 				int eID = enchList.get(index).effectId;
 				dispEnchants.add(eID);
 				fontRenderer.drawSplitString(StatCollector.translateToLocal(enchList.get(index).getName()), x + 32, y + 64 + (i*32), 64, 14737632);
-				fontRenderer.drawString(buyEnchants.containsKey(eID)? (buyEnchants.get(eID) == 0? "Any" : "Lvl " + buyEnchants.get(eID)) : "None", x + 32, y + 84 + (i*32), 14737632);
+				fontRenderer.drawString(buyEnchants.containsKey(eID)? "Lvl " + buyEnchants.get(eID) : "None", x + 32, y + 84 + (i*32), 14737632);
 				this.mc.renderEngine.bindTexture(texture);
 				this.drawTexturedModalRect(x + 80, y + 80 + (i*32), 0, 184, 16, 8);
 				this.drawTexturedModalRect(x + 80, y + 88 + (i*32), 16, 184, 16, 8);
+			}
+			
+			if(!requestFlag && !bannedEnchant)
+			{
+				fontRenderer.drawString("Enchants: " + HandlerEconomy.GetDisplayCost(eCost), x + 128, y + 96, 14737632);
+				fontRenderer.drawString("Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%", x + 128, y + 104, 14737632);
+				fontRenderer.drawString("", x + 128, y + 112, 14737632);
+				fontRenderer.drawString("Total: $" + Math.round((double)eCost * ((double)damage/100D)), x + 128, y + 128, 14737632);
+			} else if(bannedEnchant)
+			{
+				fontRenderer.drawString("Enchants: " + HandlerEconomy.GetDisplayCost(eCost), x + 128, y + 96, 14737632);
+				fontRenderer.drawString("Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%", x + 128, y + 104, 14737632);
+				fontRenderer.drawString("", x + 128, y + 112, 14737632);
+				fontRenderer.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 128, y + 128, 14737632);
+			} else
+			{
+				fontRenderer.drawString("Loading prices...", x + 128, y + 104, 14737632);
 			}
 		} else if(curPage == 3)
 		{
@@ -561,83 +718,235 @@ public class GuiTrader extends GuiContainer
 				
 				this.drawItemStack(trade.tradeItem, x + 92, y + 68 + (i * 16), trade.tradeItem.stackSize > 1? "" + trade.tradeItem.stackSize : "");
 			}
-			
-			for(int i = 0; i < HandlerTradeDB.buyList.size(); i++)
-			{
-				TradeInstance trade = HandlerTradeDB.buyList.get(i);
-				
-				if(this.isPointInRegion(28, 68 + (i * 16) + 1, 14, 14, par2, par3))
-				{
-					this.drawItemStackTooltip(trade.tradeItem, par2, par3);
-				}
-			}
-			
-			for(int i = 0; i < HandlerTradeDB.sellList.size(); i++)
-			{
-				TradeInstance trade = HandlerTradeDB.sellList.get(i);
-				
-				if(this.isPointInRegion(92, 68 + (i * 16) + 1, 14, 14, par2, par3))
-				{
-					this.drawItemStackTooltip(trade.tradeItem, par2, par3);
-				}
-			}
 		} else if(curPage == 1)
 		{
 			ItemStack sellStack = containerTrader.getSlot(0).getStack();
 			
 			if(sellStack != null)
 			{
-				ItemInfo iInfo = HandlerEconomy.economyDB.get(sellStack.itemID);
+				int sDamage = sellStack.isItemStackDamageable()? (int)Math.floor((double)sellStack.getItemDamage()/(double)sellStack.getMaxDamage()*100D) : 100;
 				
-				NBTTagList enchTags = sellStack.getEnchantmentTagList();
+				int[] sellPrices = this.getSellCosts(sellStack);
 				
-				if(sellStack.itemID == Item.enchantedBook.itemID)
+				if(sellPrices[2] == 2)
 				{
-					enchTags = Item.enchantedBook.func_92110_g(sellStack);
-				}
-				
-				int bonusCost = 0;
-				
-				if(enchTags != null && iInfo != null)
-				{
-					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(iInfo.currentWorth) + (sellStack.isItemDamaged()? EnumChatFormatting.RED + " -" + Math.round(((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage() * 100F)) + "%" : ""), x + 56, y + 52, 14737632);
-										
-					for(int i = 0; i < enchTags.tagCount(); i++)
-					{
-	                    short enID = ((NBTTagCompound)enchTags.tagAt(i)).getShort("id");
-	                    short enLVL = ((NBTTagCompound)enchTags.tagAt(i)).getShort("lvl");
-						
-						ItemInfo eInfo = HandlerEconomy.enchantDB.get((int)enID);
-						
-						if(eInfo != null)
-						{
-							bonusCost += eInfo.currentWorth * enLVL;
-						}
-					}
+					confirmButton.enabled = false;
+					sellOfferBox.setTextColor(Color.WHITE.hashCode());
 					
-					fontRenderer.drawString("" + enchTags.tagCount() + " Enchants", x + 56, y + 60, 14737632);
-					fontRenderer.drawString("+ " + HandlerEconomy.GetDisplayCost(bonusCost), x + 56, y + 68, 14737632);
-				} else if(iInfo != null)
+					fontRenderer.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 56, y + 60, 14737632);
+				} else if(sellPrices[2] == 1)
 				{
-					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(iInfo.currentWorth) + (sellStack.isItemDamaged()? EnumChatFormatting.RED + " -" + Math.round(((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage() * 100F)) + "%" : ""), x + 56, y + 60, 14737632);
-				}
-				
-				if(iInfo != null)
-				{
-					float damagePercent = 1F - (sellStack.isItemDamaged()? ((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage()) : 0F);
-					fontRenderer.drawString("$" + Math.round((float)(iInfo.currentWorth + bonusCost) * damagePercent), x + 28, y + 100, 14737632);
+					confirmButton.enabled = false;
+					sellOfferBox.setTextColor(Color.WHITE.hashCode());
+					
+					fontRenderer.drawString("Loading...", x + 56, y + 60, 14737632);
 				} else
 				{
-					fontRenderer.drawString("$0", x + 28, y + 100, 14737632);
+					confirmButton.enabled = true;
+					fontRenderer.drawString(HandlerEconomy.GetDisplayCost((sellPrices[0] + sellPrices[1]) * sellStack.stackSize), x + 56, y + 52, 14737632);
+					if(sellStack.isItemDamaged())
+					{
+						fontRenderer.drawString("Damage: " + (sellStack.isItemDamaged()? EnumChatFormatting.RED + "" + sDamage + "%" : ""), x + 56, y + 60, 14737632);
+					}
+					double damagePercent = 1F - (sellStack.isItemDamaged()? ((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage()) : 0F);
+					int finalCost = (int)Math.round((double)(sellPrices[0] + sellPrices[1]) * damagePercent * sellStack.stackSize);
+					fontRenderer.drawString("$" + finalCost, x + 56, y + 68, 14737632);
+					
+					if(Math.abs(finalCost - this.GetAmountFromString(sellOfferBox.getText())) <= finalCost * 0.1D)
+					{
+						confirmButton.enabled = true;
+						confirmButton.displayString = "Confirm";
+						sellOfferBox.setTextColor(Color.WHITE.hashCode());
+					} else
+					{
+						confirmButton.enabled = false;
+						sellOfferBox.setTextColor(Color.RED.hashCode());
+					}
 				}
+			} else
+			{
+				confirmButton.enabled = false;
 			}
 		} else if(curPage == 0)
 		{
+			ArrayList<ItemStack> itemList = new ArrayList<ItemStack>();
+			
+			for(int i = 0; i < Item.itemsList.length; i++)
+			{
+				if(Item.itemsList[i] != null && Item.itemsList[i].getCreativeTab() != null)
+				{
+					if(Item.itemsList[i].getHasSubtypes())
+					{
+						Item iMain = Item.itemsList[i];
+						ArrayList<ItemStack> subTypes = new ArrayList<ItemStack>();
+						iMain.getSubItems(iMain.itemID, iMain.getCreativeTab(), subTypes);
+						
+						for(int j = 0; j < subTypes.size(); j++)
+						{
+							boolean flag = false;
+							Iterator<String> iterator = subTypes.get(j).getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips).iterator();
+							
+							while (true)
+				            {
+				                if (iterator.hasNext())
+				                {
+				                    String s1 = iterator.next();
+
+				                    if (!s1.toLowerCase().contains(buySearchBox.getText().toLowerCase()))
+				                    {
+				                        continue;
+				                    }
+
+				                    flag = true;
+				                }
+
+				                if (flag)
+				                {
+									itemList.add(subTypes.get(j));
+				                }
+
+				                break;
+				            }
+						}
+					} else
+					{
+						boolean flag = false;
+						Iterator<String> iterator = new ItemStack(Item.itemsList[i]).getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips).iterator();
+						
+						while (true)
+			            {
+			                if (iterator.hasNext())
+			                {
+			                    String s1 = iterator.next();
+
+			                    if (!s1.toLowerCase().contains(buySearchBox.getText().toLowerCase()))
+			                    {
+			                        continue;
+			                    }
+
+			                    flag = true;
+			                }
+
+			                if (flag)
+			                {
+								itemList.add(new ItemStack(Item.itemsList[i]));
+			                }
+
+			                break;
+			            }
+					}
+				}
+			}
+			
+			{
+				boolean flag = false;
+				Iterator<String> iterator = new ItemStack(Item.enchantedBook).getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips).iterator();
+				
+				while (true)
+	            {
+	                if (iterator.hasNext())
+	                {
+	                    String s1 = iterator.next();
+
+	                    if (!s1.toLowerCase().contains(buySearchBox.getText().toLowerCase()))
+	                    {
+	                        continue;
+	                    }
+
+	                    flag = true;
+	                }
+
+	                if (flag)
+	                {
+						itemList.add(new ItemStack(Item.enchantedBook));
+	                }
+
+	                break;
+	            }
+			}
+			
 			if(buyItem != null)
 			{
-				buyItem.stackSize = this.GetAmountFromString(this.buyAmountBox.getText());
-				this.drawItemStack(buyItem, x + 120, y + 120, "" + (buyItem.stackSize > 1? buyItem.stackSize : ""));
+				int[] costs = this.getBuyCosts();
+				
+				if(costs[2] == 2)
+				{
+					confirmButton.enabled = false;
+					buyOfferBox.setTextColor(Color.WHITE.hashCode());
+					
+					fontRenderer.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 144, y + 124, 14737632);
+				} else if(costs[2] == 1)
+				{
+					confirmButton.enabled = false;
+					buyOfferBox.setTextColor(Color.WHITE.hashCode());
+					
+					fontRenderer.drawString("Loading costs...", x + 144, y + 124, 14737632);
+					requestFlag = true;
+				} else
+				{
+					int finalCost = (int)Math.round((double)((costs[0] + costs[1]) * buyItem.stackSize) * ((double)damage/100D));
+					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(costs[0] + costs[1]) + " x" + buyItem.stackSize, x + 144, y + 116, 14737632);
+					fontRenderer.drawString((buyItem.isItemDamaged() && damageType != 2? "Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%" : ""), x + 144, y + 124, 14737632);
+					fontRenderer.drawString("= $" + finalCost, x + 144, y + 132, 14737632);
+					
+					if(Math.abs(finalCost - this.GetAmountFromString(buyOfferBox.getText())) <= (double)finalCost * 0.1D)
+					{
+						confirmButton.enabled = true;
+						buyOfferBox.setTextColor(Color.WHITE.hashCode());
+					} else
+					{
+						confirmButton.enabled = false;
+						buyOfferBox.setTextColor(Color.RED.hashCode());
+					}
+				}
+			} else
+			{
+				confirmButton.enabled = false;
 			}
+			
+			if(scrollPos*3 + 12 > itemList.size())
+			{
+				scrollPos = (int)Math.ceil((double)(itemList.size() - 12)/3D);
+				if(scrollPos < 0)
+				{
+					scrollPos = 0;
+				}
+			}
+
+			int scrollBarPos = 0;
+			scrollBarPos = (int)Math.ceil(72D*((double)scrollPos/Math.ceil((double)(itemList.size() - 12)/3D)));
+			if(scrollBarPos > 72)
+			{
+				scrollBarPos = 72;
+			} else if(scrollBarPos < 0)
+			{
+				scrollBarPos = 0;
+			}
+
+			this.mc.renderEngine.bindTexture(texture);
+			this.drawTexturedModalRect(x + 24, y + 64 + scrollBarPos, 0, 184, 8, 8);
+			
+			dispItems.clear();
+			
+			for(int i = 0; i + (scrollPos*3) < itemList.size() && i < 12; i++)
+			{
+				RenderHelper.disableStandardItemLighting();
+				dispItems.add(itemList.get(i + scrollPos*3));
+				this.drawItemStack(itemList.get(i + scrollPos*3), x + 38 + (i%3)*20, y + 68 + 18*(i/3), "");
+				RenderHelper.enableStandardItemLighting();
+			}
+			
+			if(buyItem != null)
+			{
+				RenderHelper.disableStandardItemLighting();
+				this.drawItemStack(buyItem, x + 120, y + 120, "" + (buyItem.stackSize > 1? buyItem.stackSize : ""));
+				RenderHelper.enableStandardItemLighting();
+			}
+		}
+		
+		if(requestFlag && requestCooldown <= 0)
+		{
+			requestCooldown = 60;
 		}
 	}
 
@@ -655,6 +964,21 @@ public class GuiTrader extends GuiContainer
         		buySearchBox.mouseClicked(par1, par2, par3);
         		buyAmountBox.mouseClicked(par1, par2, par3);
         		buyOfferBox.mouseClicked(par1, par2, par3);
+        		
+        		if(par3 == 0)
+        		{
+        			for(int i = 0; i < dispItems.size() && i < 12; i++)
+        			{
+        				if(this.isPointInRegion(39 + (i%3)*20, 69 + 18*(i/3), 14, 14, par1, par2))
+        				{
+        					buyItem = dispItems.get(i);
+        					buyEnchants.clear();
+        					optionDamageBox.setText("100");
+        					damageType = 0;
+        					break;
+        				}
+        			}
+        		}
         		break;
         	}
         	
@@ -700,6 +1024,8 @@ public class GuiTrader extends GuiContainer
 	        				{
 	        					buyEnchants.put(eID, 1);
 	        				}
+	        				
+	        				break;
 	        			} else if(this.isPointInRegion(80, 88 + (i*32), 16, 8, par1, par2))
 	        			{
 	                        this.mc.sndManager.playSoundFX("random.click", 1.0F, 1.0F);
@@ -714,6 +1040,8 @@ public class GuiTrader extends GuiContainer
 	        						buyEnchants.remove(eID);
 	        					}
 	        				}
+	        				
+	        				break;
 	        			}
 	        		}
         		}
@@ -730,9 +1058,12 @@ public class GuiTrader extends GuiContainer
     	{
 	    	int scrollDir = (int)Math.signum(Mouse.getEventDWheel());
 	    	
-	    	if(scrollPos + scrollDir <= 0)
+	    	if(scrollPos - scrollDir <= 0)
 	    	{
 	    		scrollPos = 0;
+	    	} else
+	    	{
+	    		scrollPos -= scrollDir;
 	    	}
     	}
     }
@@ -751,6 +1082,7 @@ public class GuiTrader extends GuiContainer
     		if(buySearchBox.isFocused())
     		{
     			buySearchBox.textboxKeyTyped(c, i);
+    			scrollPos = 0;
     		} else if(buyAmountBox.isFocused() && keyType != 2)
     		{
     			buyAmountBox.textboxKeyTyped(c, i);
@@ -911,6 +1243,99 @@ public class GuiTrader extends GuiContainer
         return null;
     }
 	
+	public int[] getSellCosts(ItemStack sellItem)
+	{
+		int[] totalCosts = new int[]{0,0,0};
+		
+		NBTTagList enchTags = sellItem.getEnchantmentTagList();
+		
+		if(sellItem.itemID == Item.enchantedBook.itemID)
+		{
+			enchTags = Item.enchantedBook.func_92110_g(sellItem);
+		}
+		
+		if(enchTags != null)
+		{
+			for(int i = 0; i < enchTags.tagCount(); i++)
+			{
+                short enID = ((NBTTagCompound)enchTags.tagAt(i)).getShort("id");
+                short enLVL = ((NBTTagCompound)enchTags.tagAt(i)).getShort("lvl");
+				
+				ItemInfo eInfo = this.requestEnchantInfo(enID);
+				
+				if(eInfo != null && eInfo.currentWorth != -1)
+				{
+					totalCosts[1] += eInfo.currentWorth * enLVL;
+				} else if(eInfo == null && totalCosts[2] != 2)
+				{
+					totalCosts[2] = 1;
+				} else
+				{
+					totalCosts[2] = 2;
+				}
+			}
+		}
+		
+		ItemInfo iInfo = requestItemInfo(sellItem.itemID);
+		
+		if(iInfo != null && iInfo.currentWorth != -1)
+		{
+			totalCosts[0] = iInfo.currentWorth;
+		} else if(iInfo == null && totalCosts[2] != 2)
+		{
+			totalCosts[2] = 1;
+		} else
+		{
+			totalCosts[2] = 2;
+		}
+		
+		return totalCosts;
+	}
+	
+	public int[] getBuyCosts()
+	{
+		int totalCosts[] = new int[]{0,0,0};
+		
+		if(buyEnchants.size() > 0)
+		{
+			for(int i = 0; i < Enchantment.enchantmentsList.length; i++)
+			{
+				if(buyEnchants.containsKey(i))
+				{
+					ItemInfo eInfo = requestEnchantInfo(i);
+					if(eInfo != null && eInfo.currentWorth != -1)
+					{
+						totalCosts[1] += (eInfo.currentWorth * buyEnchants.get(i));
+					} else if(eInfo == null)
+					{
+						totalCosts[2] = 1;
+					} else
+					{
+						totalCosts[2] = 2;
+					}
+				}
+			}
+		}
+		
+		if(buyItem != null)
+		{
+			ItemInfo iInfo = requestItemInfo(buyItem.itemID);
+			
+			if(iInfo != null && iInfo.currentWorth != -1)
+			{
+				totalCosts[0] = iInfo.currentWorth;
+			} else if(iInfo == null && totalCosts[2] != 2)
+			{
+				totalCosts[2] = 1;
+			} else
+			{
+				totalCosts[2] = 2;
+			}
+		}
+		
+		return totalCosts;
+	}
+	
 	public ItemInfo requestItemInfo(int itemID)
 	{
 		if(tmpEconDB.containsKey(itemID))
@@ -921,6 +1346,7 @@ public class GuiTrader extends GuiContainer
 		if(requestCooldown == 0)
 		{
 			// TODO: Send packet to server requesting this item's info profile
+			return HandlerEconomy.economyDB.get(itemID);
 		}
 		return null;
 	}
@@ -935,6 +1361,7 @@ public class GuiTrader extends GuiContainer
 		if(requestCooldown == 0)
 		{
 			// TODO: Send packet to server requesting this enchantment's info profile
+			return HandlerEconomy.enchantDB.get(enchantID);
 		}
 		
 		return null;

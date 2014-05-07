@@ -104,9 +104,6 @@ public class HandlerEconomy
 				buffer.close();
 				fileIn.close();
 				
-				economyDB = new HashMap<Integer, ItemInfo>();
-				enchantDB = new HashMap<Integer, ItemInfo>();
-				
 				Iterator<HashMap<String, HashMap>> iterator = loadedDB.iterator();
 				
 				while(iterator.hasNext())
@@ -216,9 +213,12 @@ public class HandlerEconomy
 		} else if(value < 1000000)
 		{
 			return "$" + (Math.round(value/100D))/10D + "K";
-		} else
+		} else if(value < 1000000000)
 		{
 			return "$" + (Math.round(value/100000D))/10D + "M";
+		} else
+		{
+			return "$" + (Math.round(value/100000000D))/10D + "B";
 		}
 	}
 }
