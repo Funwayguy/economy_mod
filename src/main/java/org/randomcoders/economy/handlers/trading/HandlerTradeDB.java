@@ -15,7 +15,7 @@ public class HandlerTradeDB
 	public static ArrayList<TradeInstance> buyList = new ArrayList<TradeInstance>();
 	public static ArrayList<TradeInstance> sellList = new ArrayList<TradeInstance>();
 	
-	public static int purchase(int Amount, int offer, TradeInstance trade)
+	public static int purchase(int Amount, long offer, TradeInstance trade)
 	{
 		int result = 2;
 		

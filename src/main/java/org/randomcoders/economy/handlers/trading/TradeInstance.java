@@ -5,14 +5,14 @@ import net.minecraft.item.ItemStack;
 public class TradeInstance
 {
 	public ItemStack tradeItem;
-	public int tradeValue;
+	public long tradeValue;
 	public String tradeOwner;
 	
 	public boolean allowNamed;
 	public int damageType;
 	public int damageValue;
 	
-	public TradeInstance(ItemStack item, int value, String owner)
+	public TradeInstance(ItemStack item, long value, String owner)
 	{
 		this.tradeItem = item;
 		this.tradeValue = value;

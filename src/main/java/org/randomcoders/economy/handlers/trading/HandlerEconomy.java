@@ -112,8 +112,8 @@ public class HandlerEconomy
 					
 					int dbType = (int)entry.get("General").get("DB");
 					int itemID = (int)entry.get("General").get("itemID");
-					int currentWorth = (int)entry.get("General").get("currentWorth");
-					int totalSpentToday = (int)entry.get("General").get("totalSpentToday");
+					long currentWorth = (long)entry.get("General").get("currentWorth");
+					long totalSpentToday = (long)entry.get("General").get("totalSpentToday");
 					int totalSalesToday = (int)entry.get("General").get("totalSalesToday");
 					
 					ItemInfo loadedInfo = new ItemInfo(itemID, currentWorth);
@@ -205,15 +205,15 @@ public class HandlerEconomy
 		}
 	}
 	
-	public static String GetDisplayCost(int value)
+	public static String GetDisplayCost(long value)
 	{
-		if(value < 1000)
+		if(value < 1000L)
 		{
 			return "$" + value;
-		} else if(value < 1000000)
+		} else if(value < 1000000L)
 		{
 			return "$" + (Math.round(value/100D))/10D + "K";
-		} else if(value < 1000000000)
+		} else if(value < 1000000000L)
 		{
 			return "$" + (Math.round(value/100000D))/10D + "M";
 		} else

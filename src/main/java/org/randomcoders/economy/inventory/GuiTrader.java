@@ -577,24 +577,24 @@ public class GuiTrader extends GuiContainer
 			damageType = 0;
 		}
 		
-		int damage = this.GetAmountFromString(optionDamageBox.getText());
-		if(damage > 100)
+		long damage = this.GetAmountFromString(optionDamageBox.getText());
+		if(damage > 100L)
 		{
-			damage = 100;
-		} else if(damage <= 0)
+			damage = 100L;
+		} else if(damage <= 0L)
 		{
-			damage = 1;
+			damage = 1L;
 		}
 		
 		if(buyItem != null)
 		{
-			int iDamage = (!buyItem.isItemStackDamageable()? 100: damage);
-			damage = (damageType == 2 || !buyItem.isItemStackDamageable()? 100: damage);
+			long iDamage = (!buyItem.isItemStackDamageable()? 100L: damage);
+			damage = (damageType == 2 || !buyItem.isItemStackDamageable()? 100L: damage);
 			if(buyItem.isItemStackDamageable())
 			{
 				buyItem.setItemDamage(buyItem.getMaxDamage() - (int)Math.round((double)buyItem.getMaxDamage() * ((double)iDamage/100D)));
 			}
-			buyItem.stackSize = this.GetAmountFromString(this.buyAmountBox.getText());
+			buyItem.stackSize = (int)this.GetAmountFromString(this.buyAmountBox.getText());
 			
 			if(buyItem.stackSize > buyItem.getMaxStackSize())
 			{
@@ -609,13 +609,13 @@ public class GuiTrader extends GuiContainer
 			}
 		} else
 		{
-			damage = 100;
+			damage = 100L;
 		}
 		
 		if(curPage == 4)
 		{
 			ArrayList<Enchantment> enchList = new ArrayList<Enchantment>();
-			int eCost = 0;
+			long eCost = 0;
 			boolean bannedEnchant = false;
 			
 			for(int i = 0; i < Enchantment.enchantmentsList.length; i++)
@@ -632,7 +632,7 @@ public class GuiTrader extends GuiContainer
 				{
 					ItemInfo eInfo = this.requestEnchantInfo(i);
 					
-					if(eInfo != null && eInfo.currentWorth != -1)
+					if(eInfo != null && eInfo.currentWorth > -1)
 					{
 						eCost += eInfo.currentWorth * buyEnchants.get(i);
 					} else if(eInfo == null)
@@ -726,7 +726,7 @@ public class GuiTrader extends GuiContainer
 			{
 				int sDamage = sellStack.isItemStackDamageable()? (int)Math.floor((double)sellStack.getItemDamage()/(double)sellStack.getMaxDamage()*100D) : 100;
 				
-				int[] sellPrices = this.getSellCosts(sellStack);
+				long[] sellPrices = this.getSellCosts(sellStack);
 				
 				if(sellPrices[2] == 2)
 				{
@@ -743,13 +743,13 @@ public class GuiTrader extends GuiContainer
 				} else
 				{
 					confirmButton.enabled = true;
-					fontRenderer.drawString(HandlerEconomy.GetDisplayCost((sellPrices[0] + sellPrices[1]) * sellStack.stackSize), x + 56, y + 52, 14737632);
+					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(sellPrices[0] + sellPrices[1]) + " x" + sellStack.stackSize, x + 56, y + 52, 14737632);
 					if(sellStack.isItemDamaged())
 					{
 						fontRenderer.drawString("Damage: " + (sellStack.isItemDamaged()? EnumChatFormatting.RED + "" + sDamage + "%" : ""), x + 56, y + 60, 14737632);
 					}
-					double damagePercent = 1F - (sellStack.isItemDamaged()? ((float)sellStack.getItemDamage()/(float)sellStack.getMaxDamage()) : 0F);
-					int finalCost = (int)Math.round((double)(sellPrices[0] + sellPrices[1]) * damagePercent * sellStack.stackSize);
+					double damagePercent = 1F - (sellStack.isItemDamaged()? ((double)sellStack.getItemDamage()/(double)sellStack.getMaxDamage()) : 0F);
+					long finalCost = (long)Math.round((double)(sellPrices[0] + sellPrices[1]) * damagePercent * sellStack.stackSize);
 					fontRenderer.drawString("$" + finalCost, x + 56, y + 68, 14737632);
 					
 					if(Math.abs(finalCost - this.GetAmountFromString(sellOfferBox.getText())) <= finalCost * 0.1D)
@@ -867,7 +867,7 @@ public class GuiTrader extends GuiContainer
 			
 			if(buyItem != null)
 			{
-				int[] costs = this.getBuyCosts();
+				long[] costs = this.getBuyCosts();
 				
 				if(costs[2] == 2)
 				{
@@ -884,7 +884,7 @@ public class GuiTrader extends GuiContainer
 					requestFlag = true;
 				} else
 				{
-					int finalCost = (int)Math.round((double)((costs[0] + costs[1]) * buyItem.stackSize) * ((double)damage/100D));
+					long finalCost = (long)Math.round((double)((costs[0] + costs[1]) * buyItem.stackSize) * ((double)damage/100D));
 					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(costs[0] + costs[1]) + " x" + buyItem.stackSize, x + 144, y + 116, 14737632);
 					fontRenderer.drawString((buyItem.isItemDamaged() && damageType != 2? "Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%" : ""), x + 144, y + 124, 14737632);
 					fontRenderer.drawString("= $" + finalCost, x + 144, y + 132, 14737632);
@@ -1199,14 +1199,14 @@ public class GuiTrader extends GuiContainer
     	}
     }
     
-    public int GetAmountFromString(String sIn)
+    public long GetAmountFromString(String sIn)
     {
     	String numStr = this.StringToAmount(sIn);
-    	int numOut = 0;
+    	long numOut = 0;
     	
     	try
     	{
-    		numOut = Integer.parseInt(numStr);
+    		numOut = Long.parseLong(numStr);
     	} catch(NumberFormatException e)
     	{
     	}
@@ -1243,9 +1243,9 @@ public class GuiTrader extends GuiContainer
         return null;
     }
 	
-	public int[] getSellCosts(ItemStack sellItem)
+	public long[] getSellCosts(ItemStack sellItem)
 	{
-		int[] totalCosts = new int[]{0,0,0};
+		long[] totalCosts = new long[]{0,0,0};
 		
 		NBTTagList enchTags = sellItem.getEnchantmentTagList();
 		
@@ -1263,7 +1263,7 @@ public class GuiTrader extends GuiContainer
 				
 				ItemInfo eInfo = this.requestEnchantInfo(enID);
 				
-				if(eInfo != null && eInfo.currentWorth != -1)
+				if(eInfo != null && eInfo.currentWorth > -1)
 				{
 					totalCosts[1] += eInfo.currentWorth * enLVL;
 				} else if(eInfo == null && totalCosts[2] != 2)
@@ -1292,9 +1292,9 @@ public class GuiTrader extends GuiContainer
 		return totalCosts;
 	}
 	
-	public int[] getBuyCosts()
+	public long[] getBuyCosts()
 	{
-		int totalCosts[] = new int[]{0,0,0};
+		long totalCosts[] = new long[]{0,0,0};
 		
 		if(buyEnchants.size() > 0)
 		{
@@ -1303,7 +1303,7 @@ public class GuiTrader extends GuiContainer
 				if(buyEnchants.containsKey(i))
 				{
 					ItemInfo eInfo = requestEnchantInfo(i);
-					if(eInfo != null && eInfo.currentWorth != -1)
+					if(eInfo != null && eInfo.currentWorth > -1)
 					{
 						totalCosts[1] += (eInfo.currentWorth * buyEnchants.get(i));
 					} else if(eInfo == null)

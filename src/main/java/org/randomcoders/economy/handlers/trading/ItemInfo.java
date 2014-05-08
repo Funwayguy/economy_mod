@@ -5,14 +5,14 @@ import java.util.HashMap;
 public class ItemInfo
 {
 	public int itemID;
-	public int currentWorth;
-	public int totalSpentToday = 0;
+	public long currentWorth;
+	public long totalSpentToday = 0;
 	public int totalSalesToday = 0;
-	public HashMap<Integer, Integer> costHistory;
+	public HashMap<Integer, Long> costHistory;
 	public HashMap<Integer, Integer> demandHistory;
 	public HashMap<Integer, Integer> supplyHistory;
 	
-	public ItemInfo(int itemID, int initWorth)
+	public ItemInfo(int itemID, long initWorth)
 	{
 		this.itemID = itemID;
 		this.currentWorth = initWorth;
@@ -43,11 +43,11 @@ public class ItemInfo
 	{
 		HashMap<String, HashMap> formattedMap = new HashMap<String, HashMap>();
 		
-		HashMap<String, Integer> generalMap = new HashMap<String, Integer>();
-		generalMap.put("itemID", this.itemID);
+		HashMap<String, Long> generalMap = new HashMap<String, Long>();
+		generalMap.put("itemID", (long)this.itemID);
 		generalMap.put("currentWorth", this.currentWorth);
 		generalMap.put("totalSpentToday", this.totalSpentToday);
-		generalMap.put("totalSalesToday", this.totalSalesToday);
+		generalMap.put("totalSalesToday", (long)this.totalSalesToday);
 		
 		formattedMap.put("General", generalMap);
 		formattedMap.put("CostHistory", this.costHistory);
