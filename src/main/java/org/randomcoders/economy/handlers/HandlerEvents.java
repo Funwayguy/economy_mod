@@ -28,6 +28,8 @@ public class HandlerEvents
 			{
 				HandlerEconomy.SaveDB();
 				HandlerConfig.worldDir = null;
+				HandlerEconomy.economyDB.clear();
+				HandlerEconomy.enchantDB.clear();
 			}
 		}
 	}

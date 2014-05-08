@@ -738,6 +738,7 @@ public class GuiTrader extends GuiContainer
 				{
 					confirmButton.enabled = false;
 					sellOfferBox.setTextColor(Color.WHITE.hashCode());
+					requestFlag = true;
 					
 					fontRenderer.drawString("Loading...", x + 56, y + 60, 14737632);
 				} else

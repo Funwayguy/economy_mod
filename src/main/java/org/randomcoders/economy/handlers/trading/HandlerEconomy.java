@@ -133,6 +133,8 @@ public class HandlerEconomy
 				}
 			} catch(IOException | ClassNotFoundException | ClassCastException e)
 			{
+				EconomyMod.logger.log(Level.WARNING, "An error occured while attempting to load economy database!");
+				e.printStackTrace();
 				return;
 			}
 		}
@@ -201,6 +203,8 @@ public class HandlerEconomy
 			fileOut.close();
 		} catch(IOException e)
 		{
+			EconomyMod.logger.log(Level.WARNING, "An error occured while attempting to save economy database!");
+			e.printStackTrace();
 			return;
 		}
 	}

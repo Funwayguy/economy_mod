@@ -24,7 +24,7 @@ public class ItemInfo
 	
 	public void UpdatePrice(int day)
 	{
-		int avgWorth = Math.round((float)totalSpentToday/(float)totalSalesToday);
+		long avgWorth = Math.round((double)totalSpentToday/(double)totalSalesToday);
 		
 		if(avgWorth != currentWorth)
 		{
@@ -43,11 +43,11 @@ public class ItemInfo
 	{
 		HashMap<String, HashMap> formattedMap = new HashMap<String, HashMap>();
 		
-		HashMap<String, Long> generalMap = new HashMap<String, Long>();
-		generalMap.put("itemID", (long)this.itemID);
+		HashMap<String, Object> generalMap = new HashMap<String, Object>();
+		generalMap.put("itemID", this.itemID);
 		generalMap.put("currentWorth", this.currentWorth);
 		generalMap.put("totalSpentToday", this.totalSpentToday);
-		generalMap.put("totalSalesToday", (long)this.totalSalesToday);
+		generalMap.put("totalSalesToday", this.totalSalesToday);
 		
 		formattedMap.put("General", generalMap);
 		formattedMap.put("CostHistory", this.costHistory);
