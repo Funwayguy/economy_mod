@@ -1,9 +1,6 @@
 package org.randomcoders.economy.inventory;
 
 import java.awt.Color;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +8,6 @@ import java.util.List;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.randomcoders.economy.blocks.TileEntityTrader;
-import org.randomcoders.economy.handlers.packets.PacketHandler;
 import org.randomcoders.economy.handlers.trading.HandlerEconomy;
 import org.randomcoders.economy.handlers.trading.HandlerTradeDB;
 import org.randomcoders.economy.handlers.trading.ItemInfo;
@@ -1351,23 +1347,7 @@ public class GuiTrader extends GuiContainer
 		if(requestCooldown == 0)
 		{
 			// TODO: Send packet to server requesting this item's info profile
-			//return HandlerEconomy.economyDB.get(itemID);
-			
-			try
-			{
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				DataOutputStream dos = new DataOutputStream(bos);
-				
-				dos.writeInt(PacketHandler.ECONOMY_ID);
-				dos.writeInt(0);
-				dos.writeInt(this.pl);
-				
-				dos.close();
-				bos.close();
-			} catch(IOException e)
-			{
-				e.printStackTrace();
-			}
+			return HandlerEconomy.economyDB.get(itemID);
 		}
 		return null;
 	}
