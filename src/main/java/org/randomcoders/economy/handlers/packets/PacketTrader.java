@@ -1,51 +1,38 @@
 package org.randomcoders.economy.handlers.packets;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import org.randomcoders.economy.core.EconomyMod;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.Packet250CustomPayload;
+import cpw.mods.fml.relauncher.Side;
+import net.minecraft.nbt.NBTTagCompound;
 
-public class PacketTrader
+public class PacketTrader extends PacketParent
 {
-	public static void handleTradePacket(Packet250CustomPayload packet)
+	public PacketTrader(NBTTagCompound tags)
 	{
-		DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
+		super(tags);
+	}
+	
+	@Override
+	public void HandlePacket(Side side)
+	{
+		int action = this.tags.getInteger("action");
 		
-		int packetID;
-		int action;
+		//valid action indexes: 0 = buy, 1 = sell, 2 = request player's trade list;
 		
-		try
+		switch(action)
 		{
-			packetID = inputStream.readInt();
-			action = inputStream.read();
-			
-			//valid action indexes: 0 = buy, 1 = sell, 2 = request player's trade list;
-			
-			switch(action)
+			case 0:
 			{
-				case 0:
-				{
-					break;
-				}
-				
-				case 1:
-				{
-					break;
-				}
-				
-				case 2:
-				{
-					break;
-				}
+				break;
 			}
 			
-			inputStream.close();
-		} catch(IOException e)
-		{
-			e.printStackTrace();
+			case 1:
+			{
+				break;
+			}
+			
+			case 2:
+			{
+				break;
+			}
 		}
 	}
 }

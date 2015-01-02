@@ -4,14 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
-import org.randomcoders.economy.blocks.TileEntityTrader;
-import org.randomcoders.economy.handlers.trading.HandlerEconomy;
-import org.randomcoders.economy.handlers.trading.HandlerTradeDB;
-import org.randomcoders.economy.handlers.trading.ItemInfo;
-import org.randomcoders.economy.handlers.trading.TradeInstance;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
@@ -20,16 +13,22 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
+import org.randomcoders.economy.blocks.TileEntityTrader;
+import org.randomcoders.economy.handlers.trading.HandlerEconomy;
+import org.randomcoders.economy.handlers.trading.HandlerTradeDB;
+import org.randomcoders.economy.handlers.trading.ItemInfo;
+import org.randomcoders.economy.handlers.trading.TradeInstance;
 
 public class GuiTrader extends GuiContainer
 {
@@ -91,9 +90,6 @@ public class GuiTrader extends GuiContainer
 	public ContainerTrader containerTrader;
 	
 	public EntityPlayer playerUser;
-	
-	public HashMap<Integer, ItemInfo> tmpEconDB = new HashMap<Integer, ItemInfo>();
-	public HashMap<Integer, ItemInfo> tmpEnchDB = new HashMap<Integer, ItemInfo>();
 	public int requestCooldown = 0;
 	public int curDay;
 	
@@ -254,28 +250,28 @@ public class GuiTrader extends GuiContainer
 		int y = this.getPosY();
 		
 		String tmpTxt = buySearchBox != null? buySearchBox.getText() : "";
-		buySearchBox = new GuiTextField(fontRenderer, x + 25, y + 49, 78, 14);
+		buySearchBox = new GuiTextField(fontRendererObj, x + 25, y + 49, 78, 14);
 		buySearchBox.setText(tmpTxt);
 
 		tmpTxt = buyAmountBox != null? buyAmountBox.getText() : "1";
-		buyAmountBox = new GuiTextField(fontRenderer, x + 113, y + 65, 30, 14);
+		buyAmountBox = new GuiTextField(fontRendererObj, x + 113, y + 65, 30, 14);
 		buyAmountBox.setText(tmpTxt);
 		buyAmountBox.setMaxStringLength(3);
 		
 		tmpTxt = buyOfferBox != null? buyOfferBox.getText() : "$0";
-		buyOfferBox = new GuiTextField(fontRenderer, x + 161, y + 65, 62, 14);
+		buyOfferBox = new GuiTextField(fontRendererObj, x + 161, y + 65, 62, 14);
 		buyOfferBox.setText(tmpTxt);
 
 		tmpTxt = sellOfferBox != null? sellOfferBox.getText() : "$0";
-		sellOfferBox = new GuiTextField(fontRenderer, x + 25, y + 97, 94, 14);
+		sellOfferBox = new GuiTextField(fontRendererObj, x + 25, y + 97, 94, 14);
 		sellOfferBox.setText(tmpTxt);
 
 		tmpTxt = marketSearchBox != null? marketSearchBox.getText() : "";
-		marketSearchBox = new GuiTextField(fontRenderer, x + 25, y + 49, 78, 14);
+		marketSearchBox = new GuiTextField(fontRendererObj, x + 25, y + 49, 78, 14);
 		marketSearchBox.setText(tmpTxt);
 
 		tmpTxt = optionDamageBox != null? optionDamageBox.getText() : "100";
-		optionDamageBox = new GuiTextField(fontRenderer, x + 177, y + 41, 30, 14);
+		optionDamageBox = new GuiTextField(fontRendererObj, x + 177, y + 41, 30, 14);
 		optionDamageBox.setText(tmpTxt);
 		optionDamageBox.setMaxStringLength(3);
 		
@@ -433,16 +429,16 @@ public class GuiTrader extends GuiContainer
 		
 		if(curPage == 0)
 		{
-			if(this.isPointInRegion(121, 121, 14, 14, par1, par2) && buyItem != null)
+			if(this.func_146978_c(121, 121, 14, 14, par1, par2) && buyItem != null)
 			{
-				this.drawItemStackTooltip(buyItem, par1, par2);
+				this.renderToolTip(buyItem, par1, par2);
 			}
 			
 			for(int i = 0; i < dispItems.size() && i < 12; i++)
 			{
-				if(this.isPointInRegion(39 + (i%3)*20, 69 + 18*(i/3), 14, 14, par1, par2))
+				if(this.func_146978_c(39 + (i%3)*20, 69 + 18*(i/3), 14, 14, par1, par2))
 				{
-					this.drawItemStackTooltip(dispItems.get(i), par1, par2);
+					this.renderToolTip(dispItems.get(i), par1, par2);
 				}
 			}
 		} else if(curPage == 2)
@@ -451,9 +447,9 @@ public class GuiTrader extends GuiContainer
 			{
 				TradeInstance trade = HandlerTradeDB.buyList.get(i);
 				
-				if(this.isPointInRegion(28, 68 + (i * 16) + 1, 14, 14, par1, par2))
+				if(this.func_146978_c(28, 68 + (i * 16) + 1, 14, 14, par1, par2))
 				{
-					this.drawItemStackTooltip(trade.tradeItem, par1, par2);
+					this.renderToolTip(trade.tradeItem, par1, par2);
 				}
 			}
 			
@@ -461,9 +457,9 @@ public class GuiTrader extends GuiContainer
 			{
 				TradeInstance trade = HandlerTradeDB.sellList.get(i);
 				
-				if(this.isPointInRegion(92, 68 + (i * 16) + 1, 14, 14, par1, par2))
+				if(this.func_146978_c(92, 68 + (i * 16) + 1, 14, 14, par1, par2))
 				{
-					this.drawItemStackTooltip(trade.tradeItem, par1, par2);
+					this.renderToolTip(trade.tradeItem, par1, par2);
 				}
 			}
 		}
@@ -476,37 +472,37 @@ public class GuiTrader extends GuiContainer
 		{
 			case 0:
 			{
-				fontRenderer.drawString("Trader", 8, 8, 4210752);
-				fontRenderer.drawString("No.", 112, 52, 4210752);
-				fontRenderer.drawString("Offer", 160, 52, 4210752);
+				fontRendererObj.drawString("Trader", 8, 8, 4210752);
+				fontRendererObj.drawString("No.", 112, 52, 4210752);
+				fontRendererObj.drawString("Offer", 160, 52, 4210752);
 				break;
 			}
 			case 1:
 			{
-				fontRenderer.drawString("Trader", 8, 8, 4210752);
-				fontRenderer.drawString("Price Per Item", 24, 84, 4210752);
-				fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), 43, 120, 4210752);
+				fontRendererObj.drawString("Trader", 8, 8, 4210752);
+				fontRendererObj.drawString("Price Per Item", 24, 84, 4210752);
+				fontRendererObj.drawString(StatCollector.translateToLocal("container.inventory"), 43, 120, 4210752);
 				break;
 			}
 			case 2:
 			{
-				fontRenderer.drawString("Trader", 8, 8, 4210752);
-				fontRenderer.drawString("Buying", 24, 52, 4210752);
-				fontRenderer.drawString("Selling", 88, 52, 4210752);
-				fontRenderer.drawString("Complete", 160, 52, 4210752);
+				fontRendererObj.drawString("Trader", 8, 8, 4210752);
+				fontRendererObj.drawString("Buying", 24, 52, 4210752);
+				fontRendererObj.drawString("Selling", 88, 52, 4210752);
+				fontRendererObj.drawString("Complete", 160, 52, 4210752);
 				break;
 			}
 			case 3:
 			{
-				fontRenderer.drawString("Trader", 8, 8, 4210752);
-				fontRenderer.drawString("Market History", 112, 52, 4210752);
+				fontRendererObj.drawString("Trader", 8, 8, 4210752);
+				fontRendererObj.drawString("Market History", 112, 52, 4210752);
 				break;
 			}
 			case 4:
 			{
-				fontRenderer.drawString("Trade Options", 8, 8, 4210752);
-				fontRenderer.drawString("Durability", 120, 24, 4210752);
-				fontRenderer.drawString("Enchantments", 24, 24, 4210752);
+				fontRendererObj.drawString("Trade Options", 8, 8, 4210752);
+				fontRendererObj.drawString("Durability", 120, 24, 4210752);
+				fontRendererObj.drawString("Enchantments", 24, 24, 4210752);
 			}
 		}
 		
@@ -526,13 +522,13 @@ public class GuiTrader extends GuiContainer
 			requestCooldown = 0;
 		}
 		
-		if((int)Math.floor(playerUser.worldObj.getWorldTime()/24000D) != curDay)
+		/*if((int)Math.floor(playerUser.worldObj.getWorldTime()/24000D) != curDay)
 		{
 			curDay = (int)Math.floor(playerUser.worldObj.getWorldTime()/24000D);
 			tmpEconDB.clear();
 			tmpEnchDB.clear();
 			requestCooldown = 0;
-		}
+		}*/
 		
 		ResourceLocation texture = noGui;
 		
@@ -630,7 +626,7 @@ public class GuiTrader extends GuiContainer
 				
 				if(buyEnchants.containsKey(i))
 				{
-					ItemInfo eInfo = this.requestEnchantInfo(i);
+					ItemInfo eInfo = this.requestEnchantInfo(Enchantment.enchantmentsList[i]);
 					
 					if(eInfo != null && eInfo.currentWorth > -1)
 					{
@@ -657,8 +653,8 @@ public class GuiTrader extends GuiContainer
 				int index = i + (scrollPos*3);
 				int eID = enchList.get(index).effectId;
 				dispEnchants.add(eID);
-				fontRenderer.drawSplitString(StatCollector.translateToLocal(enchList.get(index).getName()), x + 32, y + 64 + (i*32), 64, 14737632);
-				fontRenderer.drawString(buyEnchants.containsKey(eID)? "Lvl " + buyEnchants.get(eID) : "None", x + 32, y + 84 + (i*32), 14737632);
+				fontRendererObj.drawSplitString(StatCollector.translateToLocal(enchList.get(index).getName()), x + 32, y + 64 + (i*32), 64, 14737632);
+				fontRendererObj.drawString(buyEnchants.containsKey(eID)? "Lvl " + buyEnchants.get(eID) : "None", x + 32, y + 84 + (i*32), 14737632);
 				this.mc.renderEngine.bindTexture(texture);
 				this.drawTexturedModalRect(x + 80, y + 80 + (i*32), 0, 184, 16, 8);
 				this.drawTexturedModalRect(x + 80, y + 88 + (i*32), 16, 184, 16, 8);
@@ -666,28 +662,28 @@ public class GuiTrader extends GuiContainer
 			
 			if(!requestFlag && !bannedEnchant)
 			{
-				fontRenderer.drawString("Enchants: " + HandlerEconomy.GetDisplayCost(eCost), x + 128, y + 96, 14737632);
-				fontRenderer.drawString("Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%", x + 128, y + 104, 14737632);
-				fontRenderer.drawString("", x + 128, y + 112, 14737632);
-				fontRenderer.drawString("Total: $" + Math.round((double)eCost * ((double)damage/100D)), x + 128, y + 128, 14737632);
+				fontRendererObj.drawString("Enchants: " + HandlerEconomy.GetDisplayCost(eCost), x + 128, y + 96, 14737632);
+				fontRendererObj.drawString("Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%", x + 128, y + 104, 14737632);
+				fontRendererObj.drawString("", x + 128, y + 112, 14737632);
+				fontRendererObj.drawString("Total: $" + Math.round((double)eCost * ((double)damage/100D)), x + 128, y + 128, 14737632);
 			} else if(bannedEnchant)
 			{
-				fontRenderer.drawString("Enchants: " + HandlerEconomy.GetDisplayCost(eCost), x + 128, y + 96, 14737632);
-				fontRenderer.drawString("Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%", x + 128, y + 104, 14737632);
-				fontRenderer.drawString("", x + 128, y + 112, 14737632);
-				fontRenderer.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 128, y + 128, 14737632);
+				fontRendererObj.drawString("Enchants: " + HandlerEconomy.GetDisplayCost(eCost), x + 128, y + 96, 14737632);
+				fontRendererObj.drawString("Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%", x + 128, y + 104, 14737632);
+				fontRendererObj.drawString("", x + 128, y + 112, 14737632);
+				fontRendererObj.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 128, y + 128, 14737632);
 			} else
 			{
-				fontRenderer.drawString("Loading prices...", x + 128, y + 104, 14737632);
+				fontRendererObj.drawString("Loading prices...", x + 128, y + 104, 14737632);
 			}
 		} else if(curPage == 3)
 		{
-			if(this.isPointInRegion(112, 72, 104, 92, par2, par3))
+			if(this.func_146978_c(112, 72, 104, 92, par2, par3))
 			{
 				ArrayList<String> toolTip = new ArrayList<String>();
 				toolTip.add("MouseX: " + par2);
 				toolTip.add("MouseY: " + par3);
-				this.drawHoveringText(toolTip, par2, par3, fontRenderer);
+				this.drawHoveringText(toolTip, par2, par3, fontRendererObj);
 			}
 		} else if(curPage == 2)
 		{
@@ -695,14 +691,14 @@ public class GuiTrader extends GuiContainer
 			{
 				TradeInstance trade = HandlerTradeDB.buyList.get(i);
 				
-				fontRenderer.drawString(HandlerEconomy.GetDisplayCost(trade.tradeValue), x + 52, y + 68 + (i * 16) + 4, 14737632);
+				fontRendererObj.drawString(HandlerEconomy.GetDisplayCost(trade.tradeValue), x + 52, y + 68 + (i * 16) + 4, 14737632);
 			}
 			
 			for(int i = 0; i < HandlerTradeDB.sellList.size(); i++)
 			{
 				TradeInstance trade = HandlerTradeDB.sellList.get(i);
 				
-				fontRenderer.drawString(HandlerEconomy.GetDisplayCost(trade.tradeValue), x + 116, y + 68 + (i * 16) + 4, 14737632);
+				fontRendererObj.drawString(HandlerEconomy.GetDisplayCost(trade.tradeValue), x + 116, y + 68 + (i * 16) + 4, 14737632);
 			}
 			
 			for(int i = 0; i < HandlerTradeDB.buyList.size(); i++)
@@ -733,25 +729,25 @@ public class GuiTrader extends GuiContainer
 					confirmButton.enabled = false;
 					sellOfferBox.setTextColor(Color.WHITE.hashCode());
 					
-					fontRenderer.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 56, y + 60, 14737632);
+					fontRendererObj.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 56, y + 60, 14737632);
 				} else if(sellPrices[2] == 1)
 				{
 					confirmButton.enabled = false;
 					sellOfferBox.setTextColor(Color.WHITE.hashCode());
 					requestFlag = true;
 					
-					fontRenderer.drawString("Loading...", x + 56, y + 60, 14737632);
+					fontRendererObj.drawString("Loading...", x + 56, y + 60, 14737632);
 				} else
 				{
 					confirmButton.enabled = true;
-					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(sellPrices[0] + sellPrices[1]) + " x" + sellStack.stackSize, x + 56, y + 52, 14737632);
+					fontRendererObj.drawString(HandlerEconomy.GetDisplayCost(sellPrices[0] + sellPrices[1]) + " x" + sellStack.stackSize, x + 56, y + 52, 14737632);
 					if(sellStack.isItemDamaged())
 					{
-						fontRenderer.drawString("Damage: " + (sellStack.isItemDamaged()? EnumChatFormatting.RED + "" + sDamage + "%" : ""), x + 56, y + 60, 14737632);
+						fontRendererObj.drawString("Damage: " + (sellStack.isItemDamaged()? EnumChatFormatting.RED + "" + sDamage + "%" : ""), x + 56, y + 60, 14737632);
 					}
 					double damagePercent = 1F - (sellStack.isItemDamaged()? ((double)sellStack.getItemDamage()/(double)sellStack.getMaxDamage()) : 0F);
 					long finalCost = (long)Math.round((double)(sellPrices[0] + sellPrices[1]) * damagePercent * sellStack.stackSize);
-					fontRenderer.drawString("$" + finalCost, x + 56, y + 68, 14737632);
+					fontRendererObj.drawString("$" + finalCost, x + 56, y + 68, 14737632);
 					
 					if(Math.abs(finalCost - this.GetAmountFromString(sellOfferBox.getText())) <= finalCost * 0.1D)
 					{
@@ -771,16 +767,17 @@ public class GuiTrader extends GuiContainer
 		} else if(curPage == 0)
 		{
 			ArrayList<ItemStack> itemList = new ArrayList<ItemStack>();
+			Iterator<Item> itemIt = Item.itemRegistry.iterator();
 			
-			for(int i = 0; i < Item.itemsList.length; i++)
+			while(itemIt.hasNext())
 			{
-				if(Item.itemsList[i] != null && Item.itemsList[i].getCreativeTab() != null)
+				Item iMain = itemIt.next();
+				if(iMain != null && iMain.getCreativeTab() != null)
 				{
-					if(Item.itemsList[i].getHasSubtypes())
+					if(iMain.getHasSubtypes())
 					{
-						Item iMain = Item.itemsList[i];
 						ArrayList<ItemStack> subTypes = new ArrayList<ItemStack>();
-						iMain.getSubItems(iMain.itemID, iMain.getCreativeTab(), subTypes);
+						iMain.getSubItems(iMain, iMain.getCreativeTab(), subTypes);
 						
 						for(int j = 0; j < subTypes.size(); j++)
 						{
@@ -812,7 +809,7 @@ public class GuiTrader extends GuiContainer
 					} else
 					{
 						boolean flag = false;
-						Iterator<String> iterator = new ItemStack(Item.itemsList[i]).getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips).iterator();
+						Iterator<String> iterator = new ItemStack(iMain).getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips).iterator();
 						
 						while (true)
 			            {
@@ -830,7 +827,7 @@ public class GuiTrader extends GuiContainer
 
 			                if (flag)
 			                {
-								itemList.add(new ItemStack(Item.itemsList[i]));
+								itemList.add(new ItemStack(iMain));
 			                }
 
 			                break;
@@ -841,7 +838,7 @@ public class GuiTrader extends GuiContainer
 			
 			{
 				boolean flag = false;
-				Iterator<String> iterator = new ItemStack(Item.enchantedBook).getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips).iterator();
+				Iterator<String> iterator = new ItemStack(Items.enchanted_book).getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips).iterator();
 				
 				while (true)
 	            {
@@ -859,7 +856,7 @@ public class GuiTrader extends GuiContainer
 
 	                if (flag)
 	                {
-						itemList.add(new ItemStack(Item.enchantedBook));
+						itemList.add(new ItemStack(Items.enchanted_book));
 	                }
 
 	                break;
@@ -875,20 +872,20 @@ public class GuiTrader extends GuiContainer
 					confirmButton.enabled = false;
 					buyOfferBox.setTextColor(Color.WHITE.hashCode());
 					
-					fontRenderer.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 144, y + 124, 14737632);
+					fontRendererObj.drawString(EnumChatFormatting.RED + "UNAVAILABLE", x + 144, y + 124, 14737632);
 				} else if(costs[2] == 1)
 				{
 					confirmButton.enabled = false;
 					buyOfferBox.setTextColor(Color.WHITE.hashCode());
 					
-					fontRenderer.drawString("Loading costs...", x + 144, y + 124, 14737632);
+					fontRendererObj.drawString("Loading costs...", x + 144, y + 124, 14737632);
 					requestFlag = true;
 				} else
 				{
 					long finalCost = (long)Math.round((double)((costs[0] + costs[1]) * buyItem.stackSize) * ((double)damage/100D));
-					fontRenderer.drawString(HandlerEconomy.GetDisplayCost(costs[0] + costs[1]) + " x" + buyItem.stackSize, x + 144, y + 116, 14737632);
-					fontRenderer.drawString((buyItem.isItemDamaged() && damageType != 2? "Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%" : ""), x + 144, y + 124, 14737632);
-					fontRenderer.drawString("= $" + finalCost, x + 144, y + 132, 14737632);
+					fontRendererObj.drawString(HandlerEconomy.GetDisplayCost(costs[0] + costs[1]) + " x" + buyItem.stackSize, x + 144, y + 116, 14737632);
+					fontRendererObj.drawString((buyItem.isItemDamaged() && damageType != 2? "Discount: " + EnumChatFormatting.RED + "-" + (100 - damage) + "%" : ""), x + 144, y + 124, 14737632);
+					fontRendererObj.drawString("= $" + finalCost, x + 144, y + 132, 14737632);
 					
 					if(Math.abs(finalCost - this.GetAmountFromString(buyOfferBox.getText())) <= (double)finalCost * 0.1D)
 					{
@@ -970,7 +967,7 @@ public class GuiTrader extends GuiContainer
         		{
         			for(int i = 0; i < dispItems.size() && i < 12; i++)
         			{
-        				if(this.isPointInRegion(39 + (i%3)*20, 69 + 18*(i/3), 14, 14, par1, par2))
+        				if(this.func_146978_c(39 + (i%3)*20, 69 + 18*(i/3), 14, 14, par1, par2))
         				{
         					buyItem = dispItems.get(i);
         					buyEnchants.clear();
@@ -1011,9 +1008,9 @@ public class GuiTrader extends GuiContainer
                         	continue;
                         }
                         
-	        			if(this.isPointInRegion(80, 80 + (i*32), 16, 8, par1, par2))
+	        			if(this.func_146978_c(80, 80 + (i*32), 16, 8, par1, par2))
 	        			{
-	                        this.mc.sndManager.playSoundFX("random.click", 1.0F, 1.0F);
+	                        this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
 	                        
 	        				if(buyEnchants.containsKey(eID))
 	        				{
@@ -1027,9 +1024,9 @@ public class GuiTrader extends GuiContainer
 	        				}
 	        				
 	        				break;
-	        			} else if(this.isPointInRegion(80, 88 + (i*32), 16, 8, par1, par2))
+	        			} else if(this.func_146978_c(80, 88 + (i*32), 16, 8, par1, par2))
 	        			{
-	                        this.mc.sndManager.playSoundFX("random.click", 1.0F, 1.0F);
+	                        this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
 	                        
 	        				if(buyEnchants.containsKey(eID))
 	        				{
@@ -1219,14 +1216,14 @@ public class GuiTrader extends GuiContainer
     {
         GL11.glTranslatef(0.0F, 0.0F, 32.0F);
         this.zLevel = 200.0F;
-        itemRenderer.zLevel = 200.0F;
+        itemRender.zLevel = 200.0F;
         FontRenderer font = null;
         if (par1ItemStack != null) font = par1ItemStack.getItem().getFontRenderer(par1ItemStack);
-        if (font == null) font = fontRenderer;
-        itemRenderer.renderItemAndEffectIntoGUI(font, this.mc.getTextureManager(), par1ItemStack, par2, par3);
-        itemRenderer.renderItemOverlayIntoGUI(font, this.mc.getTextureManager(), par1ItemStack, par2, par3, par4Str);
+        if (font == null) font = fontRendererObj;
+        itemRender.renderItemAndEffectIntoGUI(font, this.mc.getTextureManager(), par1ItemStack, par2, par3);
+        itemRender.renderItemOverlayIntoGUI(font, this.mc.getTextureManager(), par1ItemStack, par2, par3, par4Str);
         this.zLevel = 0.0F;
-        itemRenderer.zLevel = 0.0F;
+        itemRender.zLevel = 0.0F;
     }
 
 	public int getPosX()
@@ -1250,19 +1247,19 @@ public class GuiTrader extends GuiContainer
 		
 		NBTTagList enchTags = sellItem.getEnchantmentTagList();
 		
-		if(sellItem.itemID == Item.enchantedBook.itemID)
+		if(sellItem.getItem() == Items.enchanted_book)
 		{
-			enchTags = Item.enchantedBook.func_92110_g(sellItem);
+			enchTags = Items.enchanted_book.func_92110_g(sellItem);
 		}
 		
 		if(enchTags != null)
 		{
 			for(int i = 0; i < enchTags.tagCount(); i++)
 			{
-                short enID = ((NBTTagCompound)enchTags.tagAt(i)).getShort("id");
-                short enLVL = ((NBTTagCompound)enchTags.tagAt(i)).getShort("lvl");
+                short enID = ((NBTTagCompound)enchTags.getCompoundTagAt(i)).getShort("id");
+                short enLVL = ((NBTTagCompound)enchTags.getCompoundTagAt(i)).getShort("lvl");
 				
-				ItemInfo eInfo = this.requestEnchantInfo(enID);
+				ItemInfo eInfo = this.requestEnchantInfo(Enchantment.enchantmentsList[enID]);
 				
 				if(eInfo != null && eInfo.currentWorth > -1)
 				{
@@ -1277,7 +1274,7 @@ public class GuiTrader extends GuiContainer
 			}
 		}
 		
-		ItemInfo iInfo = requestItemInfo(sellItem.itemID);
+		ItemInfo iInfo = requestItemInfo(sellItem.getItem());
 		
 		if(iInfo != null && iInfo.currentWorth != -1)
 		{
@@ -1303,7 +1300,7 @@ public class GuiTrader extends GuiContainer
 			{
 				if(buyEnchants.containsKey(i))
 				{
-					ItemInfo eInfo = requestEnchantInfo(i);
+					ItemInfo eInfo = requestEnchantInfo(Enchantment.enchantmentsList[i]);
 					if(eInfo != null && eInfo.currentWorth > -1)
 					{
 						totalCosts[1] += (eInfo.currentWorth * buyEnchants.get(i));
@@ -1320,7 +1317,7 @@ public class GuiTrader extends GuiContainer
 		
 		if(buyItem != null)
 		{
-			ItemInfo iInfo = requestItemInfo(buyItem.itemID);
+			ItemInfo iInfo = requestItemInfo(buyItem.getItem());
 			
 			if(iInfo != null && iInfo.currentWorth != -1)
 			{
@@ -1337,32 +1334,34 @@ public class GuiTrader extends GuiContainer
 		return totalCosts;
 	}
 	
-	public ItemInfo requestItemInfo(int itemID)
+	public ItemInfo requestItemInfo(Item item)
 	{
-		if(tmpEconDB.containsKey(itemID))
+		String name = Item.itemRegistry.getNameForObject(item);
+		
+		if(HandlerEconomy.economyDB.containsKey(name))
 		{
-			return tmpEconDB.get(itemID);
+			return HandlerEconomy.economyDB.get(name);
 		}
 		
 		if(requestCooldown == 0)
 		{
 			// TODO: Send packet to server requesting this item's info profile
-			return HandlerEconomy.economyDB.get(itemID);
+			HandlerEconomy.RequestInfo(this.playerUser, item);
 		}
 		return null;
 	}
 	
-	public ItemInfo requestEnchantInfo(int enchantID)
+	public ItemInfo requestEnchantInfo(Enchantment enchant)
 	{
-		if(tmpEnchDB.containsKey(enchantID))
+		if(HandlerEconomy.enchantDB.containsKey("" + enchant.effectId))
 		{
-			return tmpEnchDB.get(enchantID);
+			return HandlerEconomy.enchantDB.get("" + enchant.effectId);
 		}
 		
 		if(requestCooldown == 0)
 		{
 			// TODO: Send packet to server requesting this enchantment's info profile
-			return HandlerEconomy.enchantDB.get(enchantID);
+			HandlerEconomy.RequestInfo(this.playerUser, enchant);
 		}
 		
 		return null;

@@ -16,7 +16,7 @@ public class ContainerTrader extends Container
 	public ContainerTrader(InventoryPlayer playerInvo, TileEntityTrader trader)
 	{
 		this.traderInventory = trader;
-		trader.openChest();
+		trader.openInventory();
 		
 		this.addSlotToContainer(new Slot(trader, 0, 24, 56));
 		
@@ -134,8 +134,8 @@ public class ContainerTrader extends Container
 		ItemStack stack = this.traderInventory.getStackInSlotOnClosing(0);
 		if(stack != null)
 		{
-			par1EntityPlayer.dropPlayerItem(stack);
+			par1EntityPlayer.dropPlayerItemWithRandomChoice(stack, false);
 		}
-		this.traderInventory.closeChest();
+		this.traderInventory.closeInventory();
 	}
 }

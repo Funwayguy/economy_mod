@@ -1,10 +1,17 @@
 package org.randomcoders.economy.handlers.packets;
 
-import net.minecraft.network.packet.Packet250CustomPayload;
+import cpw.mods.fml.relauncher.Side;
+import net.minecraft.nbt.NBTTagCompound;
 
-public class PacketNotice
+public class PacketNotice extends PacketParent
 {
-	public static void handleNoticePacket(Packet250CustomPayload packet)
+	public PacketNotice(NBTTagCompound tags)
+	{
+		super(tags);
+	}
+	
+	@Override
+	public void HandlePacket(Side side)
 	{
 	}
 }

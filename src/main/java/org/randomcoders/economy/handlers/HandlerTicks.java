@@ -1,43 +1,24 @@
 package org.randomcoders.economy.handlers;
 
-import java.util.EnumSet;
 import org.randomcoders.economy.handlers.trading.HandlerEconomy;
-import net.minecraft.world.World;
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 
-public class HandlerTicks implements ITickHandler
+public class HandlerTicks
 {
 	public static void RegisterTickHandlers()
 	{
-		TickRegistry.registerTickHandler(new HandlerTicks(), Side.SERVER);
+		FMLCommonHandler.instance().bus().register(new HandlerTicks());
 	}
 	
-	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData)
+	@SubscribeEvent
+	public void tickStart(TickEvent.WorldTickEvent tick)
 	{
-		World world = (World)tickData[0];
-		
-		HandlerEconomy.UpdateDay(world);
-	}
-	
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData)
-	{
-	}
-	
-	@Override
-	public EnumSet<TickType> ticks()
-	{
-		return EnumSet.of(TickType.WORLD);
-	}
-	
-	@Override
-	public String getLabel()
-	{
-		return "EconomyWorldTick";
+		if(tick.side == Side.SERVER)
+		{
+			HandlerEconomy.UpdateDay(tick.world);
+		}
 	}
 }
