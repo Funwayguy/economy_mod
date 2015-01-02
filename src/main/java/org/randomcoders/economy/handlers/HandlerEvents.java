@@ -1,13 +1,13 @@
 package org.randomcoders.economy.handlers;
 
 import org.randomcoders.economy.handlers.trading.HandlerEconomy;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.world.WorldEvent.*;
 
 public class HandlerEvents
 {
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void OnWorldLoad(Load event)
 	{
 		if(!event.world.isRemote && HandlerConfig.worldDir == null)
@@ -17,7 +17,7 @@ public class HandlerEvents
 		}
 	}
 	
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void OnWorldUnload(Unload event)
 	{
 		if(!event.world.isRemote)
@@ -28,6 +28,8 @@ public class HandlerEvents
 			{
 				HandlerEconomy.SaveDB();
 				HandlerConfig.worldDir = null;
+				HandlerEconomy.economyDB.clear();
+				HandlerEconomy.enchantDB.clear();
 			}
 		}
 	}

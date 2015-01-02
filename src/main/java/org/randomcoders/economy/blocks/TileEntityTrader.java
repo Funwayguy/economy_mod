@@ -1,6 +1,5 @@
 package org.randomcoders.economy.blocks;
 
-import org.randomcoders.economy.handlers.trading.HandlerEconomy;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -42,7 +41,7 @@ public class TileEntityTrader extends TileEntity implements IInventory
             {
                 itemstack = this.contents[par1];
                 this.contents[par1] = null;
-                this.onInventoryChanged();
+                this.markDirty();
                 return itemstack;
             }
             else
@@ -54,7 +53,7 @@ public class TileEntityTrader extends TileEntity implements IInventory
                     this.contents[par1] = null;
                 }
 
-                this.onInventoryChanged();
+                this.markDirty();
                 return itemstack;
             }
         }
@@ -94,13 +93,13 @@ public class TileEntityTrader extends TileEntity implements IInventory
             par2ItemStack.stackSize = this.getInventoryStackLimit();
         }
 
-        this.onInventoryChanged();
+        this.markDirty();
     }
 
     /**
      * Returns the name of the inventory.
      */
-    public String getInvName()
+    public String getInventoryName()
     {
         return "economy.inv.trader";
     }
@@ -119,23 +118,23 @@ public class TileEntityTrader extends TileEntity implements IInventory
      */
     public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer)
     {
-        return this.worldObj.getBlockTileEntity(this.xCoord, this.yCoord, this.zCoord) != this ? false : par1EntityPlayer.getDistanceSq((double)this.xCoord + 0.5D, (double)this.yCoord + 0.5D, (double)this.zCoord + 0.5D) <= 64.0D;
+        return this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord) != this ? false : par1EntityPlayer.getDistanceSq((double)this.xCoord + 0.5D, (double)this.yCoord + 0.5D, (double)this.zCoord + 0.5D) <= 64.0D;
     }
 
 	@Override
-	public boolean isInvNameLocalized()
+	public boolean hasCustomInventoryName()
 	{
 		return false;
 	}
 
 	@Override
-	public void openChest()
+	public void openInventory()
 	{
 		inUse = true;
 	}
 
 	@Override
-	public void closeChest()
+	public void closeInventory()
 	{
 		inUse = false;
 	}

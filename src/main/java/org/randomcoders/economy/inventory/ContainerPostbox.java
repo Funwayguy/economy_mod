@@ -13,7 +13,7 @@ public class ContainerPostbox extends Container
 	public ContainerPostbox(IInventory playerInvo, TileEntityPostbox tile)
 	{
 		this.postboxInventory = tile;
-		tile.openChest();
+		tile.openInventory();
 		
 		int i = (3 - 4) * 18;
 		int j;
@@ -88,6 +88,6 @@ public class ContainerPostbox extends Container
 	public void onContainerClosed(EntityPlayer par1EntityPlayer)
 	{
 		super.onContainerClosed(par1EntityPlayer);
-		this.postboxInventory.closeChest();
+		this.postboxInventory.closeInventory();
 	}
 }

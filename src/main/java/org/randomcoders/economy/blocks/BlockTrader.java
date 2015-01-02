@@ -1,40 +1,39 @@
 package org.randomcoders.economy.blocks;
 
-import org.randomcoders.economy.core.EconomyMod;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
+import org.randomcoders.economy.core.EconomyMod;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class BlockTrader extends BlockContainer
 {
-	public Icon frontIcon;
-	public Icon sideIcon;
-	public Icon topIcon;
+	public IIcon frontIcon;
+	public IIcon sideIcon;
+	public IIcon topIcon;
 	
-	public BlockTrader(int id, Material material)
+	public BlockTrader(Material material)
 	{
-		super(id, material);
+		super(material);
 		setHardness(5);
-		setStepSound(Block.soundMetalFootstep);
+		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(EconomyMod.economyTab);
-		setUnlocalizedName("economy.block.trader");
-		setTextureName("economy:block_trader");
-		MinecraftForge.setBlockHarvestLevel(this, "pickaxe", 0);
+		setBlockTextureName("economy:block_trader");
+		this.setHarvestLevel("pickaxe", 1);
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister iconRegister)
+	@Override
+	public void registerBlockIcons(IIconRegister iconRegister)
 	{
 		this.frontIcon = iconRegister.registerIcon(getTextureName() + "_front");
 		this.sideIcon = iconRegister.registerIcon(getTextureName() + "_side");
@@ -43,7 +42,7 @@ public class BlockTrader extends BlockContainer
 	
 	public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
 	{
-		TileEntity tile = par1World.getBlockTileEntity(par2, par3, par4);
+		TileEntity tile = par1World.getTileEntity(par2, par3, par4);
 		
 		if(tile instanceof TileEntityTrader)
 		{
@@ -68,7 +67,7 @@ public class BlockTrader extends BlockContainer
     /**
      * From the specified side and block metadata retrieves the blocks texture. Args: side, metadata
      */
-    public Icon getIcon(int par1, int par2)
+    public IIcon getIcon(int par1, int par2)
     {
         return par1 == 1 ? this.topIcon : (par1 == 0 ? this.topIcon : (par1 != par2 ? this.sideIcon : this.frontIcon));
     }
@@ -89,28 +88,28 @@ public class BlockTrader extends BlockContainer
     {
         if (!par1World.isRemote)
         {
-            int l = par1World.getBlockId(par2, par3, par4 - 1);
-            int i1 = par1World.getBlockId(par2, par3, par4 + 1);
-            int j1 = par1World.getBlockId(par2 - 1, par3, par4);
-            int k1 = par1World.getBlockId(par2 + 1, par3, par4);
+            Block l = par1World.getBlock(par2, par3, par4 - 1);
+            Block i1 = par1World.getBlock(par2, par3, par4 + 1);
+            Block j1 = par1World.getBlock(par2 - 1, par3, par4);
+            Block k1 = par1World.getBlock(par2 + 1, par3, par4);
             byte b0 = 3;
 
-            if (Block.opaqueCubeLookup[l] && !Block.opaqueCubeLookup[i1])
+            if (l.isOpaqueCube() && !i1.isOpaqueCube())
             {
                 b0 = 3;
             }
 
-            if (Block.opaqueCubeLookup[i1] && !Block.opaqueCubeLookup[l])
+            if (i1.isOpaqueCube() && !l.isOpaqueCube())
             {
                 b0 = 2;
             }
 
-            if (Block.opaqueCubeLookup[j1] && !Block.opaqueCubeLookup[k1])
+            if (j1.isOpaqueCube() && !k1.isOpaqueCube())
             {
                 b0 = 5;
             }
 
-            if (Block.opaqueCubeLookup[k1] && !Block.opaqueCubeLookup[j1])
+            if (k1.isOpaqueCube() && !j1.isOpaqueCube())
             {
                 b0 = 4;
             }
@@ -148,7 +147,7 @@ public class BlockTrader extends BlockContainer
     }
 
 	@Override
-	public TileEntity createNewTileEntity(World world)
+	public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_)
 	{
 		return new TileEntityTrader();
 	}

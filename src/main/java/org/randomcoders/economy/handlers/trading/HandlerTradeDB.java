@@ -2,11 +2,10 @@ package org.randomcoders.economy.handlers.trading;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.logging.Level;
-
+import org.apache.logging.log4j.Level;
 import org.randomcoders.economy.core.EconomyMod;
-
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -15,7 +14,7 @@ public class HandlerTradeDB
 	public static ArrayList<TradeInstance> buyList = new ArrayList<TradeInstance>();
 	public static ArrayList<TradeInstance> sellList = new ArrayList<TradeInstance>();
 	
-	public static int purchase(int Amount, int offer, TradeInstance trade)
+	public static int purchase(int Amount, long offer, TradeInstance trade)
 	{
 		int result = 2;
 		
@@ -88,9 +87,9 @@ public class HandlerTradeDB
 		
 		for(int i = rand.nextInt(5) + 5; i >= 0; i--)
 		{
-			ItemStack tradeItem = new ItemStack(Item.pickaxeDiamond);
+			ItemStack tradeItem = new ItemStack(Items.diamond_pickaxe);
 			
-			tradeItem.setItemDamage(rand.nextInt(Item.pickaxeDiamond.getMaxDamage()));
+			tradeItem.setItemDamage(rand.nextInt(Items.diamond_pickaxe.getMaxDamage()));
 			
 			if(rand.nextBoolean() && rand.nextBoolean())
 			{

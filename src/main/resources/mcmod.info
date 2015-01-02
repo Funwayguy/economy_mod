@@ -1,0 +1,14 @@
+[{
+    "modid": "economy",
+    "name": "Economy",
+    "description": "An economy mod that uses the rules of supply and demand",
+    "version": "ECO_VER_KEY",
+    "mcversion": "1.7.10",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["Funwayguy","ThoricChaos","Shaun van Tonder", "KadenShow","Joe Rickard"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+}]

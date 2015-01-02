@@ -2,6 +2,7 @@ package org.randomcoders.economy.core.proxies;
 
 import org.randomcoders.economy.core.EconomyMod;
 import org.randomcoders.economy.handlers.*;
+import org.randomcoders.economy.handlers.packets.PacketHandler;
 import net.minecraftforge.common.AchievementPage;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -31,6 +32,7 @@ public class CommonProxy
 	{
 		HandlerTicks.RegisterTickHandlers();
 		HandlerGui.RegisterGuiHandlers();
+		PacketHandler.RegisterHandlers();
 	}
 	
 	public void postInit(FMLPostInitializationEvent event)

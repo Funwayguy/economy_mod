@@ -5,9 +5,13 @@ buildscript {
             name = "forge"
             url = "http://files.minecraftforge.net/maven"
         }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.0-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
     }
 }
 
@@ -18,13 +22,13 @@ sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
 
 group = 'org.randomcoders.economy'
-version = "vECO_VER_NUM"
-archivesBaseName = 'EconomyMod'
+version = "ECO_VER_KEY"
+archivesBaseName = 'Economy'
  
 logger.lifecycle ""+version
  
 minecraft {
-    version = "1.6.4-9.11.1.964"
+    version = "1.7.10-10.13.0.1180"
 }
  
 processResources

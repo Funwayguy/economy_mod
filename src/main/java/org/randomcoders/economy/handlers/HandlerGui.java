@@ -1,5 +1,8 @@
 package org.randomcoders.economy.handlers;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import org.randomcoders.economy.blocks.TileEntityPostbox;
 import org.randomcoders.economy.blocks.TileEntityTrader;
 import org.randomcoders.economy.core.EconomyMod;
@@ -7,10 +10,6 @@ import org.randomcoders.economy.inventory.ContainerPostbox;
 import org.randomcoders.economy.inventory.ContainerTrader;
 import org.randomcoders.economy.inventory.GuiPostbox;
 import org.randomcoders.economy.inventory.GuiTrader;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 
@@ -18,13 +17,13 @@ public class HandlerGui implements IGuiHandler
 {
 	public static void RegisterGuiHandlers()
 	{
-		NetworkRegistry.instance().registerGuiHandler(EconomyMod.instance, new HandlerGui());
+		NetworkRegistry.INSTANCE.registerGuiHandler(EconomyMod.instance, new HandlerGui());
 	}
 	
 	@Override
 	public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z)
 	{
-		TileEntity tile = world.getBlockTileEntity(x, y, z);
+		TileEntity tile = world.getTileEntity(x, y, z);
 		
 		if(id == 0 && tile != null)
 		{
@@ -41,7 +40,7 @@ public class HandlerGui implements IGuiHandler
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z)
 	{
-		TileEntity tile = world.getBlockTileEntity(x, y, z);
+		TileEntity tile = world.getTileEntity(x, y, z);
 		
 		if(ID == 0 && tile != null)
 		{
